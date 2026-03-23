@@ -1,4 +1,8 @@
-```md
+
+
+---
+
+```markdown
 # 🛡️ SafeDeal — Secure Escrow Web Platform
 
 ## 📌 Project Description
@@ -7,51 +11,54 @@
 The platform acts as a **trusted intermediary (escrow system)** that temporarily holds funds until both parties confirm that the transaction is successfully completed.
 
 This helps prevent common online scams where:
-- Buyers send money but never receive the product  
-- Sellers ship products but never receive payment  
+- Buyers send money but never receive the product.
+- Sellers ship products but never receive payment.
 
 ---
 
 ## 🚀 Key Features
 
-- 🔐 User Registration & Authentication (JWT-based)
-- 🤝 Deal Creation between Buyer and Seller
-- 💰 Escrow Payment System (simulated wallet)
-- 📦 Deal Status Tracking
-- ⭐ User Rating & Trust Score System
-- ⚠️ Dispute Handling System
-- 📜 Transaction History
+* **🔐 Authentication:** User Registration & Login (JWT-based).
+* **🤝 Deal Management:** Create and manage deals between Buyers and Sellers.
+* **💰 Escrow System:** Simulated wallet to hold funds securely.
+* **📦 Tracking:** Real-time deal status tracking.
+* **⭐ Trust System:** User Rating & Trust Score.
+* **⚠️ Dispute Handling:** Dedicated system for conflict resolution.
+* **📜 History:** Full transaction and activity logs.
 
 ---
 
 ## 🔄 How It Works
 
-1. **Seller creates a deal** (product, price, buyer)
-2. **Buyer confirms participation**
-3. **Buyer sends payment to escrow**
-4. **Seller ships the product**
-5. **Buyer confirms delivery**
-6. **System releases money to seller**
+1.  **Deal Creation:** Seller creates a deal (listing product, price, and buyer).
+2.  **Confirmation:** Buyer confirms participation in the deal.
+3.  **Escrow Deposit:** Buyer sends the payment to the secure escrow wallet.
+4.  **Shipping:** Seller ships the product to the buyer.
+5.  **Release:** Buyer confirms delivery; the system releases funds to the seller.
 
-If something goes wrong, a **dispute** can be opened.
+> [!IMPORTANT]
+> If a dispute arises at any stage, the funds remain locked in escrow until a resolution is reached.
 
 ---
 
 ## 🏗️ Tech Stack
 
-- Frontend: Angular  
-- Backend: Django + Django REST Framework  
-- Database: PostgreSQL  
+| Layer | Technology |
+| :--- | :--- |
+| **Frontend** | Angular |
+| **Backend** | Django + Django REST Framework |
+| **Database** | PostgreSQL |
+| **Auth** | JWT (JSON Web Token) |
 
 ---
 
 ## 📂 Project Structure
 
-```
-
-/frontend   → Angular application
-/backend    → Django REST API
-
+```text
+.
+├── /frontend      # Angular application
+├── /backend       # Django REST API
+└── README.md      # Project documentation
 ```
 
 ---
@@ -59,132 +66,100 @@ If something goes wrong, a **dispute** can be opened.
 ## ⚙️ Installation & Setup
 
 ### 1️⃣ Clone Repository
-
-```
-
-git clone []()
+```bash
+git clone [https://github.com/Kanaagaat/SafeDeal/tree/main](https://github.com/Kanaagaat/SafeDeal/tree/main)
 cd safedeal
-
 ```
-
----
 
 ### 2️⃣ Backend Setup (Django)
-
-```
-
+```bash
 cd backend
 python -m venv venv
+
+# Activate Virtual Environment
 source venv/bin/activate  # Mac/Linux
 venv\Scripts\activate     # Windows
 
+# Install Dependencies & Run
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py runserver
-
 ```
-
----
 
 ### 3️⃣ Frontend Setup (Angular)
-
-```
-
+```bash
 cd frontend
 npm install
 ng serve
-
 ```
-
-Frontend will run on:
-```
-
-[http://localhost:4200](http://localhost:4200)
-
-```
-
----
-
-## 🔐 Authentication
-
-The system uses **JWT (JSON Web Token)** authentication:
-- Login returns access token
-- Token is used for all protected API requests
+The frontend will be available at: `http://localhost:4200`
 
 ---
 
 ## 📡 API Overview
 
 ### Authentication
-- `POST /api/register`
-- `POST /api/login`
+* `POST /api/register` — Create a new account
+* `POST /api/login` — Obtain JWT access tokens
 
 ### Deals
-- `GET /api/deals`
-- `POST /api/deals`
-- `PUT /api/deals/{id}`
-- `DELETE /api/deals/{id}`
+* `GET /api/deals` — List all user deals
+* `POST /api/deals` — Initiate a new deal
+* `PUT /api/deals/{id}` — Update deal status
+* `DELETE /api/deals/{id}` — Cancel a deal
 
 ### Transactions
-- `POST /api/deals/{id}/pay`
-- `POST /api/deals/{id}/confirm`
+* `POST /api/deals/{id}/pay` — Deposit money into escrow
+* `POST /api/deals/{id}/confirm` — Release money to seller
 
 ---
 
 ## 📊 Database Models
 
-- User  
-- Deal  
-- Transaction  
-- Rating  
-- (Optional) Shipment  
-- (Optional) Dispute  
+* **User:** Profiles, balances, and trust ratings.
+* **Deal:** Core deal data (Buyer, Seller, Price, Status).
+* **Transaction:** Ledger of all fund movements.
+* **Rating:** Feedback left by users after completion.
+* **(Optional) Dispute:** Log for contested transactions.
 
 ---
 
 ## 👥 Team Members
 
-- **Sauranbay Kanagat — 24B032003**  
-- **Sagat Alikhan — 24B031983**  
-- **Nurila Salamat — 24B031994**  
+* **Sauranbay Kanagat** — 24B032003
+* **Sagat Alikhan** — 24B031983
+* **Nurila Salamat** — 24B031994
 
 ---
 
-## 🕒 Schedule
+## 🕒 Course Schedule
 
-- **Lecture Time:** Monday 15:00–17:00  
-- **Practice Time:** 15:00–17:00  
+* **Lecture Time:** Monday 15:00–17:00
+* **Practice Time:** Monday 17:00–19:00
 
 ---
 
 ## 🎯 Project Goals
 
-- Build a full-stack web application using Angular and Django  
-- Implement RESTful API with authentication  
-- Design a relational database using PostgreSQL  
-- Solve a real-world problem (online transaction safety)  
-
----
-
-## 📌 Notes
-
-- Payments are simulated (no real money transactions)
-- Designed for educational purposes
-- Follows course requirements for Web Development at KBTU
+* Build a full-stack web application using **Angular** and **Django**.
+* Implement a secure **RESTful API** with token authentication.
+* Design a robust relational database using **PostgreSQL**.
+* Solve a real-world problem regarding online transaction safety at **KBTU**.
 
 ---
 
 ## 📈 Future Improvements
 
-- Real payment gateway integration  
-- Delivery tracking API  
-- Mobile application  
-- Advanced fraud detection system  
+* Integration with real payment gateways (Stripe/PayPal).
+* Delivery tracking via third-party APIs.
+* Mobile application development.
+* AI-driven fraud detection.
 
 ---
 
 ## 📄 License
 
-This project is developed for academic purposes at KBTU.
+This project is developed for academic purposes at **Kazakh-British Technical University (KBTU)**.
 ```
-# SafeDeal
+
+Would you like me to generate a `.gitignore` file for your project to keep your `venv` and `node_modules` out of the repository?
