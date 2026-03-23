@@ -1,8 +1,5 @@
 
-
 ---
-
-```markdown
 # 🛡️ SafeDeal — Secure Escrow Web Platform
 
 ## 📌 Project Description
@@ -15,6 +12,22 @@ This helps prevent common online scams where:
 - Sellers ship products but never receive payment.
 
 ---
+
+## 👥 Team Members
+
+* **Sauranbay Kanagat** — 24B032003
+* **Sagat Alikhan** — 24B031983
+* **Nurila Salamat** — 24B031994
+
+---
+
+## 🕒 Course Schedule
+
+* **Lecture Time:** Monday 15:00–17:00
+* **Practice Time:** Monday 17:00–19:00
+
+
+
 
 ## 🚀 Key Features
 
@@ -124,21 +137,6 @@ The frontend will be available at: `http://localhost:4200`
 
 ---
 
-## 👥 Team Members
-
-* **Sauranbay Kanagat** — 24B032003
-* **Sagat Alikhan** — 24B031983
-* **Nurila Salamat** — 24B031994
-
----
-
-## 🕒 Course Schedule
-
-* **Lecture Time:** Monday 15:00–17:00
-* **Practice Time:** Monday 17:00–19:00
-
----
-
 ## 🎯 Project Goals
 
 * Build a full-stack web application using **Angular** and **Django**.
@@ -160,6 +158,3 @@ The frontend will be available at: `http://localhost:4200`
 ## 📄 License
 
 This project is developed for academic purposes at **Kazakh-British Technical University (KBTU)**.
-```
-
-Would you like me to generate a `.gitignore` file for your project to keep your `venv` and `node_modules` out of the repository?
