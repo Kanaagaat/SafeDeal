@@ -1,0 +1,101 @@
+<div class="page-container">
+  <a class="back-link" routerLink="/dashboard">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+    </svg>
+    Back to Dashboard
+  </a>
+
+  <div class="profile-wrapper" *ngIf="profile">
+
+    <!-- Hero banner -->
+    <div class="profile-hero card">
+      <div class="profile-hero__avatar">
+        {{ profile.username.charAt(0).toUpperCase() }}
+      </div>
+      <div class="profile-hero__info">
+        <h2>{{ profile.username }}</h2>
+        <p>Member since {{ profile.memberSince }}</p>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid card">
+      <div class="stat stat--yellow">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+        <p class="stat__value">{{ profile.trustScore }}</p>
+        <p class="stat__label">Trust Score</p>
+      </div>
+      <div class="stat stat--green">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2">
+          <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+        <p class="stat__value">{{ profile.completedDeals }}</p>
+        <p class="stat__label">Completed Deals</p>
+      </div>
+      <div class="stat stat--blue">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2">
+          <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+        </svg>
+        <p class="stat__value">${{ formatVolume(profile.totalVolume) }}</p>
+        <p class="stat__label">Total Volume</p>
+      </div>
+    </div>
+
+    <!-- Recent Deals -->
+    <div class="card section-card">
+      <h3 class="section-title">Recent Deals</h3>
+      <div class="recent-deals">
+        <div class="recent-deal" *ngFor="let deal of profile.recentDeals">
+          <div class="recent-deal__info">
+            <p class="recent-deal__title">{{ deal.title }}</p>
+            <p class="recent-deal__role">{{ deal.role | titlecase }}</p>
+          </div>
+          <div class="recent-deal__right">
+            <span class="recent-deal__price">${{ deal.price | number }}</span>
+            <span [class]="'badge badge-' + getStatusClass(deal.status)">
+              {{ getStatusLabel(deal.status) }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reviews -->
+    <div class="card section-card">
+      <h3 class="section-title">Reviews</h3>
+      <div class="reviews">
+        <div class="review" *ngFor="let review of profile.reviews">
+          <div class="review__header">
+            <div class="review__left">
+              <a class="review__author">{{ review.author }}</a>
+              <div class="stars">
+                <svg *ngFor="let s of getStars(review.rating)" width="14" height="14"
+                     viewBox="0 0 24 24" fill="#F59E0B" stroke="#F59E0B" stroke-width="1">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+                <svg *ngFor="let s of getEmptyStars(review.rating)" width="14" height="14"
+                     viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" stroke-width="1.5">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+              </div>
+            </div>
+            <span class="review__date">{{ review.date }}</span>
+          </div>
+          <p class="review__comment">{{ review.comment }}</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-wrapper">
+    <div class="skeleton" style="height:140px; border-radius:12px; margin-bottom:16px"></div>
+    <div class="skeleton" style="height:120px; border-radius:12px; margin-bottom:16px"></div>
+    <div class="skeleton" style="height:260px; border-radius:12px"></div>
+  </div>
+</div>

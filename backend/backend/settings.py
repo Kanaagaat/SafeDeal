@@ -15,7 +15,6 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
@@ -26,11 +25,22 @@ SECRET_KEY = "django-insecure-_r434xz14e_q02b_*j38uzby_flw_9=qh2=3@#m*i%2*fy!qz&
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
-
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:4200",
+]
 # Application definition
 
 INSTALLED_APPS = [
+    'deals',
+    'users',
+    'transaction',
+    'ratings',
+
+    'corsheaders',
+    'rest_framework',
+    'rest_framework_simplejwt',
+
+
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -47,6 +57,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
 ]
 
 ROOT_URLCONF = "backend.urls"
@@ -97,6 +108,8 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
+
+AUTH_USER_MODEL = 'users.User'
 
 
 # Internationalization

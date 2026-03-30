@@ -1,0 +1,227 @@
+.page-title {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin-bottom: 24px;
+}
+
+.balance-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.balance-card {
+  border-radius: var(--radius);
+  padding: 22px 24px;
+  border: 1.5px solid var(--border);
+
+  &__icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+
+    &--green { background: var(--success-light); color: var(--success); }
+    &--orange { background: var(--warning-light); color: var(--warning); }
+  }
+
+  &__label {
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+
+  &__amount {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  &--primary {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+    .balance-card__label { opacity: 0.85; }
+  }
+
+  &--available {
+    background: #fff;
+    .balance-card__label { color: var(--text-secondary); }
+    .balance-card__amount { color: var(--text-primary); }
+  }
+
+  &--escrow {
+    background: #fff;
+    border-color: var(--warning);
+    .balance-card__label { color: var(--text-secondary); }
+    .balance-card__amount { color: var(--text-primary); }
+  }
+}
+
+.add-funds-btn {
+  margin-bottom: 28px;
+}
+
+.transactions-card {
+  padding: 28px 30px;
+}
+
+.transactions-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.transactions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.transaction {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--border);
+
+  &:last-child { border-bottom: none; }
+
+  &__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    &--escrow  { background: var(--warning-light); color: var(--warning); }
+    &--deposit { background: var(--success-light); color: var(--success); }
+    &--release { background: var(--primary-light); color: var(--primary); }
+  }
+
+  &__info { flex: 1; }
+
+  &__desc {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  &__date {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  &__right { text-align: right; }
+
+  &__amount {
+    font-size: 16px;
+    font-weight: 700;
+    font-family: 'DM Mono', monospace;
+
+    &.positive { color: var(--success); }
+    &.neutral  { color: var(--text-primary); }
+  }
+
+  &__status {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  animation: fadeIn 0.15s;
+}
+
+.modal {
+  width: 400px;
+  padding: 32px;
+  animation: slideUp 0.2s;
+
+  h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+  }
+}
+
+.form-group {
+  margin-bottom: 20px;
+
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+
+  input {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 11px 14px 11px 28px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+
+    &:focus { border-color: var(--primary); outline: none; }
+  }
+}
+
+.input-prefix-wrapper {
+  position: relative;
+  .input-prefix {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    font-size: 14px;
+  }
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  .btn-primary, .btn-secondary { flex: 1; justify-content: center; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius);
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes fadeIn  { from { opacity: 0 } to { opacity: 1 } }
+@keyframes slideUp { from { transform: translateY(16px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }

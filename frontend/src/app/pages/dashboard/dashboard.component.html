@@ -1,0 +1,75 @@
+<div class="page-container">
+  <div class="dashboard-header">
+    <div>
+      <h1 class="page-title">My Deals</h1>
+      <p class="page-subtitle">Manage your active and completed transactions</p>
+    </div>
+    <a routerLink="/create-deal" class="btn-primary">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="16"/>
+        <line x1="8" y1="12" x2="16" y2="12"/>
+      </svg>
+      Create Deal
+    </a>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="skeleton" *ngFor="let i of [1,2,3,4]"></div>
+  </div>
+
+  <!-- Empty state -->
+  <div *ngIf="!loading && deals.length === 0" class="empty-state">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" stroke-width="1.5">
+      <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+    </svg>
+    <p>No deals yet. <a routerLink="/create-deal">Create your first deal</a></p>
+  </div>
+
+  <!-- Deals list -->
+  <div class="deals-list" *ngIf="!loading && deals.length > 0">
+    <div class="deal-card card" *ngFor="let deal of deals">
+      <div class="deal-card__left">
+        <h3 class="deal-card__title">{{ deal.title }}</h3>
+        <div class="deal-card__parties">
+          <span class="party">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+            Buyer: {{ deal.buyer }}
+          </span>
+          <span class="party">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+            Seller: {{ deal.seller }}
+          </span>
+        </div>
+        <p class="deal-card__role">You are the {{ deal.role }}</p>
+      </div>
+      <div class="deal-card__right">
+        <span class="deal-card__price">${{ deal.price | number }}</span>
+        <span [class]="'badge badge-' + getStatusClass(deal.status)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <ng-container [ngSwitch]="deal.status">
+              <ng-container *ngSwitchCase="'money_secured'">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+              </ng-container>
+              <ng-container *ngSwitchCase="'shipped'">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </ng-container>
+              <ng-container *ngSwitchCase="'payment_pending'">
+                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+              </ng-container>
+              <ng-container *ngSwitchDefault>
+                <polyline points="20 6 9 17 4 12"/>
+              </ng-container>
+            </ng-container>
+          </svg>
+          {{ getStatusLabel(deal.status) }}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
