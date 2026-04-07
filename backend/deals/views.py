@@ -76,7 +76,7 @@ class DealDetailView(APIView):
         if status_value not in valid_statuses:
             return Response({'error': f'Status field must be one of these {valid_statuses}'}, status=status.HTTP_400_BAD_REQUEST)
 
-        deal.status = status_value
+        deal.deal_status = status_value
         deal.save()
 
         serializer = DealSerializer(deal)

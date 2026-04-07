@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
-from .serializers import RegisterSerializer, LoginSerializer
+from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
 
 # Create your views here.
 @api_view(['POST'])
@@ -45,6 +45,7 @@ def login(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+
 @api_view(['POST'])
 def logout(request):
     try:
@@ -60,6 +61,27 @@ def logout(request):
     except Exception as e:
         return Response({'error': str(e)}, 
                        status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def profile(request):
+    serializer = UserSerializer(request.user)
+    return Response(serializer.data)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def add_funds(request):
+    amount = float(request.data.get('amount', 0))
+    if amount <= 0:
+        return Response({'error': 'Invalid amount'}, status=400)
+    
+    request.user.balance += amount
+    request.user.save()
+    
+    return Response({
+        'balance': request.user.balance,
+        'escrow_balance': request.user.escrow_balance
+    })
 
 
 

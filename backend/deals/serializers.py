@@ -16,21 +16,23 @@ class DealSerializer(serializers.ModelSerializer):
         model=Deal
         fields=[
             'id', 'product_name', 'product_description', 'product_price', 
-            'buyer_contact', 'status', 'buyer', 'seller',
+            'deal_status', 'buyer', 'seller',
             'buyer_id', 'seller_id', 'created_at', 'updated_at'
         ]
 
         read_only_fields = [
-            'id', 'status', 'buyer', 'seller', 'created_at', 'updated_at'
+            'id', 'deal_status', 'buyer', 'seller', 'created_at', 'updated_at'
         ]
 
     
 
 class DealCreateSerializer(serializers.ModelSerializer):
+    buyer = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    
     class Meta:
         model=Deal
         fields=[
-            'product_name', 'product_description', 'product_price', 'buyer_contact'
+            'product_name', 'product_description', 'product_price', 'buyer'
         ]
 
     def validate_price(self, price):

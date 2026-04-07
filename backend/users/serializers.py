@@ -21,15 +21,17 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
     
     def validate_email(self, data):
-        if User.objects.filter(email=data).exist():
+        if User.objects.filter(email=data).exists():
             raise serializers.ValidationError("Email already exists")
         return data
     
     def validate_username(self, data):
-        if User.objects.filter(username=data).exist():
+        if User.objects.filter(username=data).exists():
             raise serializers.ValidationError("Username already exist")
         return data
-    
+
+
+
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(min_length=8, write_only=True)
@@ -50,9 +52,16 @@ class LoginSerializer(serializers.Serializer):
 
             
         data['user'] = user
+        return data 
 
 
 
+class UserSerializer(serializers.ModelSerializer):
+    """Сериализатор для пользователя (только чтение)"""
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'email', 'balance', 'escrow_balance', 'trust_score', 'date_joined')
+        read_only_fields = ('id', 'balance', 'escrow_balance', 'trust_score', 'date_joined')
 
 
 

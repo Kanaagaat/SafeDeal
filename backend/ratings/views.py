@@ -11,7 +11,7 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
-class RatinListCreateView(APIView):
+class RatingListCreateView(APIView):
     permission_classes=[IsAuthenticated]
 
     def get(self, request):
@@ -79,14 +79,14 @@ class RatinListCreateView(APIView):
 
         if serializer.is_valid():
             rating = serializer.save()(
-                reviewed_user = request.user,
+                reviewer = request.user,
                 reviewed_user = deal.seller
             )
 
 
             seller = deal.seller
 
-            all_ratings = Rating.object.filter(reviewed=seller)
+            all_ratings = Rating.objects.filter(reviewed_user=seller)
 
             avg_rating = sum(r.rating for r in all_ratings)/len(all_ratings)
 
