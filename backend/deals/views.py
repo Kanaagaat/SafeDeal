@@ -111,6 +111,36 @@ class DealDetailView(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
 
-
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def confirm_delivery(request, pk):
+    """Confirm delivery of a deal - mark as DELIVERED and release funds to seller"""
+    deal = get_object_or_404(Deal, pk=pk)
     
-        
+    # Only buyer can confirm delivery
+    if deal.buyer != request.user:
+        return Response({'error': 'Only buyer can confirm delivery'}, 
+                       status=status.HTTP_403_FORBIDDEN)
+    
+    # Deal must be in SHIPPED status
+    if deal.deal_status != Deal.Status.SHIPPED:
+        return Response({'error': f'Deal must be in SHIPPED status, current: {deal.deal_status}'}, 
+                       status=status.HTTP_400_BAD_REQUEST)
+    
+    # Update deal status to DELIVERED
+    deal.deal_status = Deal.Status.DELIVERED
+    deal.save()
+    
+    # Release funds from escrow to seller
+    seller = deal.seller
+    seller.escrow_balance -= deal.product_price
+    seller.balance += deal.product_price
+    seller.save()
+    
+    # Release buyer's escrow
+    buyer = deal.buyer
+    buyer.escrow_balance -= deal.product_price
+    buyer.save()
+    
+    serializer = DealSerializer(deal)
+    return Response(serializer.data, status=status.HTTP_200_OK)

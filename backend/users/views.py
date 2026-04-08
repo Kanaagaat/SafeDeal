@@ -8,7 +8,7 @@ from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
 
 # Create your views here.
 @api_view(['POST'])
-
+@permission_classes([AllowAny])
 def register(request):
     serializer = RegisterSerializer(data=request.data)
 
@@ -16,13 +16,21 @@ def register(request):
         user = serializer.save()
         refresh = RefreshToken.for_user(user)
         return Response({
-            'user': serializer.data,
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'balance': user.balance,
+                'escrow_balance': user.escrow_balance,
+                'trust_score': user.trust_score
+            },
             'refresh': str(refresh),
             'access': str(refresh.access_token),
         }, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def login(request):
     serializer = LoginSerializer(data=request.data)
 
@@ -67,6 +75,16 @@ def logout(request):
 def profile(request):
     serializer = UserSerializer(request.user)
     return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_balance(request):
+    user = request.user
+    return Response({
+        'balance': float(user.balance),
+        'escrow_balance': float(user.escrow_balance),
+        'trust_score': float(user.trust_score)
+    })
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])

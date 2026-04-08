@@ -5,17 +5,19 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, min_length=8)
+    password = serializers.CharField(write_only=True, min_length=6)
 
     class Meta:
         model = User
-        fields = ('username','email','password')
+        fields = ('username', 'email', 'password', 'first_name', 'last_name')
 
-    def create(self, validate_data):
+    def create(self, validated_data):
         user = User.objects.create_user(
-            username=validate_data['username'],
-            email=validate_data['email'],
-            password=validate_data['password']
+            username=validated_data['username'],
+            email=validated_data['email'],
+            password=validated_data['password'],
+            first_name=validated_data.get('first_name', ''),
+            last_name=validated_data.get('last_name', '')
         )
 
         return user
@@ -34,14 +36,14 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
-    password = serializers.CharField(min_length=8, write_only=True)
+    password = serializers.CharField(min_length=6, write_only=True)
 
     def validate(self, data):
         username = data.get('username')
         password = data.get('password')
 
         if not username or not password:
-            raise serializers.ValidationError('Must include both usernmae and password')
+            raise serializers.ValidationError('Must include both username and password')
 
         user = authenticate(username=username, password=password)
 

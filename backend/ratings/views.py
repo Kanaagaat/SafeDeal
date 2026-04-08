@@ -52,9 +52,9 @@ class RatingListCreateView(APIView):
         
         deal = get_object_or_404(Deal, id=deal_id)
 
-        if deal.deal_status != Deal.Status.COMPLETED:
+        if deal.deal_status != Deal.Status.DELIVERED:
             return Response(
-                {'error': 'Can only rate completed deals'},
+                {'error': 'Can only rate DELIVERED deals'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
@@ -63,14 +63,14 @@ class RatingListCreateView(APIView):
                 {'error': 'Only the buyer can rate the seller'}
             , status=status.HTTP_400_BAD_REQUEST)
         
-        if Rating.objects.filter(deal=deal, reviewed_user=request.user).exist():
+        if Rating.objects.filter(deal=deal, reviewer=request.user).exists():
             return Response(
                 {'error': 'You have already rated this deal'}
             , status=status.HTTP_400_BAD_REQUEST)
         
 
         rating_data = {
-            'deal': deal.id,
+            'deal': deal_id,
             'rating': rating_value,
             'comment': comment
         }
@@ -78,9 +78,9 @@ class RatingListCreateView(APIView):
         serializer = RatingSerializer(rating_data)
 
         if serializer.is_valid():
-            rating = serializer.save()(
+            rating = serializer.save(
                 reviewer = request.user,
-                reviewed_user = deal.seller
+                reviewed_user = deal.seller,
             )
 
 

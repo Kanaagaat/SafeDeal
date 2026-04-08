@@ -5,30 +5,50 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 class DealSerializer(serializers.ModelSerializer):
-    buyer = serializers.StringRelatedField(read_only=True)
-    seller = serializers.StringRelatedField(read_only=True)
-    buyer_id = serializers.ReadOnlyField(source='buyer.id')
-    seller_id = serializers.ReadOnlyField(source='seller.id')
+    buyer = serializers.SerializerMethodField()
+    seller = serializers.SerializerMethodField()
+    # Aliases for frontend compatibility
+    title = serializers.CharField(source='product_name', read_only=True)
+    description = serializers.CharField(source='product_description', read_only=True)
+    price = serializers.DecimalField(source='product_price', max_digits=10, decimal_places=2, read_only=True)
+    status = serializers.CharField(source='deal_status', read_only=True)
 
+    def get_buyer(self, obj):
+        return {
+            'username': obj.buyer.username,
+            'trust_score': obj.buyer.trust_score
+        }
 
+    def get_seller(self, obj):
+        return {
+            'username': obj.seller.username,
+            'trust_score': obj.seller.trust_score
+        }
 
     class Meta:
-        model=Deal
-        fields=[
+        model = Deal
+        fields = [
             'id', 'product_name', 'product_description', 'product_price', 
             'deal_status', 'buyer', 'seller',
-            'buyer_id', 'seller_id', 'created_at', 'updated_at'
+            'title', 'description', 'price', 'status',
+            'created_at', 'updated_at'
         ]
 
         read_only_fields = [
-            'id', 'deal_status', 'buyer', 'seller', 'created_at', 'updated_at'
+            'id', 'deal_status', 'buyer', 'seller', 'created_at', 'updated_at',
+            'title', 'description', 'price', 'status'
         ]
 
     
 
 class DealCreateSerializer(serializers.ModelSerializer):
-    buyer = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
-    
+    buyer = serializers.SlugRelatedField(
+        slug_field='username',
+        queryset=User.objects.all(),
+        required=False,
+        allow_null=True
+    )
+
     class Meta:
         model=Deal
         fields=[

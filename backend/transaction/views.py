@@ -14,10 +14,11 @@ User = get_user_model()
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def pay(request):
     
-    deal_id = request.data.get(deal_id)
-    amount = request.data.get(amount)
+    deal_id = request.data.get('deal_id')
+    amount = request.data.get('amount')
 
     if not deal_id or not amount:
         return Response({'error': 'Deal amount are required'}, status = status.HTTP_400_BAD_REQUEST)
@@ -29,16 +30,16 @@ def pay(request):
                         status=status.HTTP_400_BAD_REQUEST)
     
 
-    deal = get_object_or_404(Deal, id=deal.id)
+    deal = get_object_or_404(Deal, id=deal_id)
 
     if deal.buyer != request.user:
         return Response({'error': 'Only buyer can pay for deal'},
                         status=status.HTTP_400_BAD_REQUEST)
     
 
-    if deal.deal_status != Deal.Status.PENDING:
+    if deal.deal_status != Deal.Status.CREATED:
         return Response(
-            {'error': f'Deal must be in PENDING status. Current status {DealSerializer(deal.deal_status).data}'},
+            {'error': f'Deal must be in CREATED status. Current status {DealSerializer(deal.deal_status).data}'},
             status=status.HTTP_400_BAD_REQUEST)
     
     if amount != float(deal.product_price):
@@ -49,7 +50,7 @@ def pay(request):
 
     
     request.user.balance -= amount
-    request.escrow_balance += amount
+    request.user.escrow_balance += amount
     request.user.save()
 
     transaction = Transaction.objects.create(
@@ -67,7 +68,7 @@ def pay(request):
     return Response(
         {'message': 'Payment successful, funds in escrow',
          'transaction': serializer.data,
-         'balance': request.balance,
+         'balance': request.user.balance,
          'escrow_balance': request.user.escrow_balance     
          },
          status=status.HTTP_200_OK
@@ -78,7 +79,7 @@ def pay(request):
 @permission_classes([IsAuthenticated])
 def confirm(request):
     
-    deal_id = request.data.get(deal_id)
+    deal_id = request.data.get('deal_id')
     
     if not deal_id:
         return Response(
@@ -122,7 +123,7 @@ def confirm(request):
     seller.save()
 
 
-    buyer_transaction = Transaction.object.create(
+    buyer_transaction = Transaction.objects.create(
         user = request.user,
         deal=deal,
         transaction_type = Transaction.TransactionType.RELEASE,

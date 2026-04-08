@@ -6,16 +6,18 @@ from django.conf import settings
 class Deal(models.Model):
 
     class Status(models.TextChoices):
-        PENDING = 'PD', "PENDING",
+        CREATED = 'CR', "CREATED",
+        PAID = 'PA', 'PAID',
+        SECURED = 'SE', 'SECURED',
         SHIPPED = 'SH', 'SHIPPED',
-        COMPLETED = 'CO', 'COMPLETED',
+        DELIVERED = 'DE', 'DELIVERED',
+        RELEASED = 'RE', 'RELEASED',
         CANCELLED = 'CA', "CANCELLED"
 
 
 
-    product_name = models.CharField('Name of product',max_length=100)
+    product_name = models.CharField('Name of product', max_length=100)
     product_description = models.TextField('Description of product')
-
     product_price = models.DecimalField('Product price', max_digits=10, decimal_places=2)
 
     buyer = models.ForeignKey(
@@ -33,8 +35,25 @@ class Deal(models.Model):
     deal_status = models.CharField(
         max_length=2,
         choices=Status.choices, 
-        default=Status.PENDING
+        default=Status.CREATED
     )
+    
+    # Aliases for frontend compatibility
+    @property
+    def title(self):
+        return self.product_name
+    
+    @property
+    def description(self):
+        return self.product_description
+    
+    @property
+    def price(self):
+        return self.product_price
+    
+    @property
+    def status(self):
+        return self.deal_status
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
