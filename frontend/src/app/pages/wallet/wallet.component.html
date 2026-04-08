@@ -11,7 +11,7 @@
         </svg>
       </div>
       <p class="balance-card__label">Total Balance</p>
-      <p class="balance-card__amount">${{ wallet.totalBalance | number }}</p>
+      <p class="balance-card__amount">${{ (wallet.balance + wallet.escrow_balance) | number: '1.2-2' }}</p>
     </div>
 
     <div class="balance-card balance-card--available">
@@ -21,7 +21,7 @@
         </svg>
       </div>
       <p class="balance-card__label">Available</p>
-      <p class="balance-card__amount">${{ wallet.available | number }}</p>
+      <p class="balance-card__amount">${{ wallet.balance | number: '1.2-2' }}</p>
     </div>
 
     <div class="balance-card balance-card--escrow">
@@ -31,7 +31,7 @@
         </svg>
       </div>
       <p class="balance-card__label">In Escrow</p>
-      <p class="balance-card__amount">${{ wallet.inEscrow | number }}</p>
+      <p class="balance-card__amount">${{ wallet.escrow_balance | number: '1.2-2' }}</p>
     </div>
   </div>
 
@@ -62,37 +62,11 @@
     </div>
   </div>
 
-  <!-- Transaction History -->
-  <div class="card transactions-card" *ngIf="wallet">
+  <!-- Transaction History - Coming Soon -->
+  <div class="card transactions-card">
     <h2 class="transactions-title">Transaction History</h2>
-    <div class="transactions-list">
-      <div class="transaction" *ngFor="let tx of wallet.transactions">
-        <div class="transaction__icon" [class]="'transaction__icon--' + tx.type">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-            <ng-container [ngSwitch]="tx.type">
-              <ng-container *ngSwitchCase="'escrow'">
-                <rect x="2" y="5" width="20" height="14" rx="2"/>
-              </ng-container>
-              <ng-container *ngSwitchCase="'deposit'">
-                <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/>
-              </ng-container>
-              <ng-container *ngSwitchDefault>
-                <polyline points="7 17 3 21 7 21"/><path d="M21 13V11a4 4 0 00-4-4H3"/>
-              </ng-container>
-            </ng-container>
-          </svg>
-        </div>
-        <div class="transaction__info">
-          <p class="transaction__desc">{{ tx.description }}</p>
-          <p class="transaction__date">{{ tx.date }}</p>
-        </div>
-        <div class="transaction__right">
-          <p class="transaction__amount" [class.positive]="tx.amount > 0" [class.neutral]="tx.amount < 0">
-            {{ tx.amount > 0 ? '+' : '' }}${{ tx.amount | number }}
-          </p>
-          <p class="transaction__status">{{ tx.status === 'held' ? 'Held in Escrow' : 'Completed' }}</p>
-        </div>
-      </div>
+    <div class="empty-placeholder">
+      <p>Transaction history coming soon</p>
     </div>
   </div>
 

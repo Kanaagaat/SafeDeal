@@ -1,0 +1,87 @@
+<div class="deal-detail-container">
+  <div class="deal-header">
+    <button (click)="goBack()" class="back-button">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      Back to Dashboard
+    </button>
+    <div class="deal-title-section" *ngIf="deal$ | async as deal">
+      <h1 class="deal-title">{{ deal.title }}</h1>
+      <div class="deal-price">${{ deal.price }}</div>
+    </div>
+  </div>
+
+  <div class="deal-content" *ngIf="deal$ | async as deal">
+    <div class="deal-main">
+      <div class="deal-info">
+        <div class="deal-description">
+          <h2>Description</h2>
+          <p>{{ deal.description }}</p>
+        </div>
+
+        <div class="deal-participants">
+          <div class="participant">
+            <h3>Seller</h3>
+            <div class="participant-info">
+              <span class="username">{{ deal.seller.username }}</span>
+              <span class="rating">⭐ {{ deal.seller.trust_score }}/5.0</span>
+            </div>
+          </div>
+          <div class="participant">
+            <h3>Buyer</h3>
+            <div class="participant-info">
+              <span class="username">{{ deal.buyer.username }}</span>
+              <span class="rating">⭐ {{ deal.buyer.trust_score }}/5.0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="deal-sidebar">
+        <div class="deal-progress">
+          <h2>Deal Progress</h2>
+          <div class="progress-steps">
+            <div class="step" *ngFor="let step of getStatusSteps(deal)">
+              <div class="step-icon" [class.completed]="step.completed">
+                <svg *ngIf="step.completed" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <div *ngIf="!step.completed" class="step-circle"></div>
+              </div>
+              <div class="step-label">{{ step.label }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="deal-actions">
+          <button (click)="confirmDelivery(deal)" class="action-button confirm-button">
+            Confirm Delivery
+          </button>
+          <button (click)="openDispute(deal)" class="action-button dispute-button">
+            Open Dispute
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="deal-important">
+      <div class="important-header">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <h3>Important</h3>
+      </div>
+      <p>Please ensure you have received the item before confirming delivery. Once confirmed, funds will be released to the seller.</p>
+    </div>
+  </div>
+
+  <!-- Rating Dialog -->
+  <app-rating-dialog 
+    *ngIf="showRatingDialog && ratingDialogData"
+    [data]="ratingDialogData"
+    (dialogClose)="closeRatingDialog()"
+  ></app-rating-dialog>
+</div>

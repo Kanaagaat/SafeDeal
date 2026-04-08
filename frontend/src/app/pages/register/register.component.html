@@ -1,0 +1,130 @@
+<div class="register-container">
+  <div class="register-card">
+    <div class="register-header">
+      <svg width="48" height="48" viewBox="0 0 28 28" fill="none">
+        <path d="M14 2L4 7V14C4 19.5 8.5 24.6 14 26C19.5 24.6 24 19.5 24 14V7L14 2Z"
+              fill="#2563EB" stroke="#2563EB" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M10 14L12.5 16.5L18 11" stroke="white" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <h1 class="register-title">Создать аккаунт SafeDeal</h1>
+      <p class="register-subtitle">Заполните форму для регистрации</p>
+    </div>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="firstName" class="form-label">Имя</label>
+          <input
+            type="text"
+            id="firstName"
+            formControlName="firstName"
+            class="form-input"
+            [class.error]="registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched"
+            placeholder="Ваше имя"
+          >
+          <div class="error-message" *ngIf="registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched">
+            Имя обязательно
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="lastName" class="form-label">Фамилия</label>
+          <input
+            type="text"
+            id="lastName"
+            formControlName="lastName"
+            class="form-input"
+            [class.error]="registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched"
+            placeholder="Ваша фамилия"
+          >
+          <div class="error-message" *ngIf="registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched">
+            Фамилия обязательна
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email" class="form-label">Электронная почта</label>
+        <input
+          type="email"
+          id="email"
+          formControlName="email"
+          class="form-input"
+          [class.error]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
+          placeholder="example@domain.com"
+        >
+        <div class="error-message" *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
+          <span *ngIf="registerForm.get('email')?.errors?.['required']">Email обязателен</span>
+          <span *ngIf="registerForm.get('email')?.errors?.['email']">Email должен быть коректным</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="username" class="form-label">Имя пользователя</label>
+        <input
+          type="text"
+          id="username"
+          formControlName="username"
+          class="form-input"
+          [class.error]="registerForm.get('username')?.invalid && registerForm.get('username')?.touched"
+          placeholder="Мин. 3 символа"
+        >
+        <div class="error-message" *ngIf="registerForm.get('username')?.invalid && registerForm.get('username')?.touched">
+          <span *ngIf="registerForm.get('username')?.errors?.['required']">Имя пользователя обязательно</span>
+          <span *ngIf="registerForm.get('username')?.errors?.['minlength']">Минимум 3 символа</span>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="password" class="form-label">Пароль</label>
+          <input
+            type="password"
+            id="password"
+            formControlName="password"
+            class="form-input"
+            [class.error]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
+            placeholder="Мин. 6 символов"
+          >
+          <div class="error-message" *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
+            <span *ngIf="registerForm.get('password')?.errors?.['required']">Пароль обязателен</span>
+            <span *ngIf="registerForm.get('password')?.errors?.['minlength']">Минимум 6 символов</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="passwordConfirm" class="form-label">Подтвердить пароль</label>
+          <input
+            type="password"
+            id="passwordConfirm"
+            formControlName="passwordConfirm"
+            class="form-input"
+            [class.error]="(registerForm.get('passwordConfirm')?.invalid && registerForm.get('passwordConfirm')?.touched) || registerForm.errors?.['passwordMismatch']"
+            placeholder="Подтвердите пароль"
+          >
+          <div class="error-message" *ngIf="registerForm.errors?.['passwordMismatch'] && registerForm.get('passwordConfirm')?.touched">
+            Пароли не совпадают
+          </div>
+        </div>
+      </div>
+
+      <div class="error-message" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <button
+        type="submit"
+        class="register-button"
+        [disabled]="isLoading || !registerForm.valid"
+      >
+        <span *ngIf="isLoading" class="spinner"></span>
+        {{ isLoading ? 'Регистрация...' : 'Создать аккаунт' }}
+      </button>
+    </form>
+
+    <div class="login-link">
+      <p>Уже есть аккаунт? <a (click)="goToLogin()" class="link">Войти</a></p>
+    </div>
+  </div>
+</div>

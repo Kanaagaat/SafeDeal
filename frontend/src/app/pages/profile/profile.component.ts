@@ -15,25 +15,6 @@ export class ProfileComponent implements OnInit {
   profile: UserProfile | null = null;
   loading = true;
 
-  private mockProfile: UserProfile = {
-    username: 'johndoe',
-    memberSince: 'January 2025',
-    avatar: 'J',
-    trustScore: 4.8,
-    completedDeals: 24,
-    totalVolume: 49000,
-    recentDeals: [
-      { id: 1, title: 'MacBook Pro 16" M3 Max', buyer: 'johndoe', seller: 'techseller', price: 3499, status: 'in_progress', role: 'buyer' },
-      { id: 2, title: 'Sony A7 IV Camera', buyer: 'photographer_jane', seller: 'johndoe', price: 2298, status: 'completed', role: 'seller' },
-      { id: 3, title: 'Herman Miller Aeron Chair', buyer: 'office_buyer', seller: 'johndoe', price: 895, status: 'completed', role: 'seller' },
-    ],
-    reviews: [
-      { id: 1, author: 'techseller', rating: 5, comment: 'Great buyer, fast payment and good communication!', date: '2026-03-15' },
-      { id: 2, author: 'photographer_jane', rating: 5, comment: 'Smooth transaction, highly recommended seller.', date: '2026-03-10' },
-      { id: 3, author: 'mobileshop', rating: 4, comment: 'Good experience overall.', date: '2026-03-05' },
-    ]
-  };
-
   constructor(private authService: AuthService) {}
 
   ngOnInit(): void {
@@ -42,13 +23,39 @@ export class ProfileComponent implements OnInit {
 
   loadProfile(): void {
     this.loading = true;
-    // Uncomment when backend is ready:
-    // this.authService.getProfile().subscribe({ next: p => { this.profile = p; this.loading = false; } });
-
-    setTimeout(() => {
-      this.profile = this.mockProfile;
-      this.loading = false;
-    }, 600);
+    const user = this.authService.getCurrentUser();
+    if (user) {
+      this.profile = {
+        username: user.username,
+        memberSince: 'Member',
+        avatar: user.username.charAt(0).toUpperCase(),
+        trustScore: user.trust_score || 0,
+        completedDeals: 0,
+        totalVolume: 0,
+        recentDeals: [],
+        reviews: []
+      };
+    }
+    
+    this.authService.getProfile().subscribe({
+      next: (userData: any) => {
+        this.profile = {
+          username: userData.username,
+          memberSince: 'Member',
+          avatar: userData.username.charAt(0).toUpperCase(),
+          trustScore: userData.trust_score || 0,
+          completedDeals: 0,
+          totalVolume: 0,
+          recentDeals: [],
+          reviews: []
+        };
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading profile:', error);
+        this.loading = false;
+      }
+    });
   }
 
   formatVolume(amount: number): string {

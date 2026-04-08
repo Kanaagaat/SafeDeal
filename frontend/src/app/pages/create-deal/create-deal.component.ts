@@ -25,16 +25,23 @@ export class CreateDealComponent {
     if (!this.form.title || !this.form.price || !this.form.buyerContact) return;
 
     this.submitting = true;
-    // Uncomment when backend ready:
-    // this.dealService.createDeal(this.form).subscribe({
-    //   next: () => this.router.navigate(['/dashboard']),
-    //   error: () => { this.submitting = false; }
-    // });
-
-    setTimeout(() => {
-      this.submitting = false;
-      this.successMsg = 'Deal created successfully! Redirecting...';
-      setTimeout(() => this.router.navigate(['/dashboard']), 1500);
-    }, 800);
+    const dealData = {
+      product_name: this.form.title,
+      product_description: this.form.description,
+      product_price: this.form.price,
+      buyer: this.form.buyerContact // This will be the buyer ID or username
+    };
+    
+    this.dealService.createDeal(dealData).subscribe({
+      next: () => {
+        this.submitting = false;
+        this.successMsg = 'Deal created successfully! Redirecting...';
+        setTimeout(() => this.router.navigate(['/dashboard']), 1500);
+      },
+      error: (error) => {
+        this.submitting = false;
+        console.error('Error creating deal:', error);
+      }
+    });
   }
 }

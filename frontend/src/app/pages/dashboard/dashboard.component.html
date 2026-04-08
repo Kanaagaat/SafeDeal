@@ -29,7 +29,7 @@
 
   <!-- Deals list -->
   <div class="deals-list" *ngIf="!loading && deals.length > 0">
-    <div class="deal-card card" *ngFor="let deal of deals">
+    <div class="deal-card card" *ngFor="let deal of deals" [routerLink]="['/deal', deal.id]">
       <div class="deal-card__left">
         <h3 class="deal-card__title">{{ deal.title }}</h3>
         <div class="deal-card__parties">
@@ -37,13 +37,13 @@
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
             </svg>
-            Buyer: {{ deal.buyer }}
+            Buyer: {{ deal.buyer.username }}
           </span>
           <span class="party">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
             </svg>
-            Seller: {{ deal.seller }}
+            Seller: {{ deal.seller.username }}
           </span>
         </div>
         <p class="deal-card__role">You are the {{ deal.role }}</p>
@@ -53,13 +53,13 @@
         <span [class]="'badge badge-' + getStatusClass(deal.status)">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <ng-container [ngSwitch]="deal.status">
-              <ng-container *ngSwitchCase="'money_secured'">
+              <ng-container *ngSwitchCase="'SE'">
                 <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
               </ng-container>
-              <ng-container *ngSwitchCase="'shipped'">
+              <ng-container *ngSwitchCase="'SH'">
                 <path d="M5 12h14M12 5l7 7-7 7"/>
               </ng-container>
-              <ng-container *ngSwitchCase="'payment_pending'">
+              <ng-container *ngSwitchCase="'PA'">
                 <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
               </ng-container>
               <ng-container *ngSwitchDefault>

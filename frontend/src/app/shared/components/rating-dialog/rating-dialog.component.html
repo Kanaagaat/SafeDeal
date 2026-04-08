@@ -1,0 +1,75 @@
+<div class="rating-dialog">
+  <div class="rating-dialog__overlay" (click)="closeDialog()"></div>
+  <div class="rating-dialog__content">
+    <div class="rating-header">
+      <h2>Оставить отзыв</h2>
+      <p>Оцените качество работы с {{ data.toUser }}</p>
+    </div>
+
+    <div class="rating-body" *ngIf="!submitted">
+      <div class="rating-stars">
+        <button
+          *ngFor="let i of [1, 2, 3, 4, 5]"
+          class="star-button"
+          [class.filled]="i <= rating"
+          (click)="setRating(i)"
+          type="button"
+        >
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="rating-text">
+        <span class="rating-value">{{ rating }}</span>
+        <span class="rating-label">из 5 звезд</span>
+      </div>
+
+      <div class="comment-section">
+        <label for="comment" class="comment-label">Комментарий (опционально)</label>
+        <textarea
+          id="comment"
+          [(ngModel)]="comment"
+          class="comment-input"
+          placeholder="Поделитесь своим мнением (макс 500 символов)"
+          maxlength="500"
+          rows="4"
+        ></textarea>
+        <span class="char-count">{{ comment.length }}/500</span>
+      </div>
+    </div>
+
+    <div class="rating-success" *ngIf="submitted">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+      <h3>Спасибо за отзыв!</h3>
+      <p>Ваш отзыв помогает улучшить SafeDeal</p>
+    </div>
+
+    <div class="rating-actions" *ngIf="!submitted">
+      <button
+        class="btn-primary"
+        (click)="submitRating()"
+        [disabled]="isSubmitting"
+      >
+        <span *ngIf="isSubmitting" class="spinner"></span>
+        {{ isSubmitting ? 'Отправка...' : 'Отправить отзыв' }}
+      </button>
+      <button
+        class="btn-secondary"
+        (click)="closeDialog()"
+        [disabled]="isSubmitting"
+      >
+        Пропустить
+      </button>
+    </div>
+
+    <div class="rating-actions" *ngIf="submitted">
+      <button class="btn-primary" (click)="closeDialog()">
+        Закрыть
+      </button>
+    </div>
+  </div>
+</div>
