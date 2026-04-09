@@ -9,5 +9,5 @@ urlpatterns = [
     path('profile/', views.profile, name='profile'),
     path('user/profile/', views.profile, name='user-profile'),
     path('user/balance/', views.get_balance, name='user-balance'),
-    path('add-funds/', views.add_funds, name='add-funds'),
+    path('user/add-funds/', views.add_funds, name='add-funds'),
 ]

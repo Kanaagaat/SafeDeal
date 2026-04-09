@@ -8,6 +8,7 @@ from .serializers import TransactionSerializer
 from deals.models import Deal
 from deals.serializers import DealSerializer
 from django.contrib.auth import get_user_model
+from django.db import transaction
 
 User = get_user_model()
 # Create your views here.
@@ -49,30 +50,32 @@ def pay(request):
         )
 
     
-    request.user.balance -= amount
-    request.user.escrow_balance += amount
-    request.user.save()
+    with transaction.atomic():
+        if request.user.balance < amount:
+            return Response({'error': 'Insufficient funds'}, status=400)
 
-    transaction = Transaction.objects.create(
-        user = request.user,
-        deal = deal,
-        transaction_type = Transaction.TransactionType.ESCROW,
-        amount = amount
-    )
+        # 1. Логика эскроу
+        request.user.balance -= amount
+        request.user.escrow_balance += amount
+        request.user.save()
 
-    deal.deal_status = Deal.Status.SHIPPED
-    deal.save()
+        # 2. Создаем транзакцию
+        Transaction.objects.create(
+            user=request.user,
+            deal=deal,
+            transaction_type=Transaction.TransactionType.ESCROW,
+            amount=amount
+        )
 
-    serializer = TransactionSerializer(transaction)
+        # 3. Меняем статус (теперь товар оплачен и должен быть отправлен)
+        deal.deal_status = Deal.Status.SHIPPED
+        deal.save()
 
-    return Response(
-        {'message': 'Payment successful, funds in escrow',
-         'transaction': serializer.data,
-         'balance': request.user.balance,
-         'escrow_balance': request.user.escrow_balance     
-         },
-         status=status.HTTP_200_OK
-    )
+    return Response({
+        'message': 'Payment successful',
+        'balance': request.user.balance,
+        'escrow_balance': request.user.escrow_balance
+    }, status=200)
 
 
 @api_view(['POST'])

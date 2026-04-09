@@ -86,20 +86,43 @@ def get_balance(request):
         'trust_score': float(user.trust_score)
     })
 
+# @api_view(['POST'])
+# @permission_classes([IsAuthenticated])
+# def add_funds(request):
+#     amount = float(request.data.get('amount', 0))
+#     if amount <= 0:
+#         return Response({'error': 'Invalid amount'}, status=400)
+    
+#     request.user.balance += amount
+#     request.user.save()
+    
+#     return Response({
+#         'balance': request.user.balance,
+#         'escrow_balance': request.user.escrow_balance
+#     })
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def add_funds(request):
-    amount = float(request.data.get('amount', 0))
-    if amount <= 0:
-        return Response({'error': 'Invalid amount'}, status=400)
+    try:
+        amount = float(request.data.get('amount', 0))
+    except (TypeError, ValueError):
+        return Response({'error': 'Invalid amount format'}, status=400)
     
-    request.user.balance += amount
+    if amount <= 0:
+        return Response({'error': 'Amount must be greater than 0'}, status=400)
+    
+    # ✅ Исправлено: конвертируем amount в Decimal
+    from decimal import Decimal
+    amount_decimal = Decimal(str(amount))
+    
+    request.user.balance += amount_decimal
     request.user.save()
     
     return Response({
-        'balance': request.user.balance,
-        'escrow_balance': request.user.escrow_balance
-    })
-
+        'balance': float(request.user.balance),
+        'escrow_balance': float(request.user.escrow_balance)
+    }, status=status.HTTP_200_OK)
 
 

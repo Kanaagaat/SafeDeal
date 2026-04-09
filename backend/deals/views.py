@@ -8,6 +8,7 @@ from .serializers import DealCreateSerializer, DealSerializer
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from .models import Deal
+from django.db import transaction
 
 class DealListView(APIView):
     permission_classes=[IsAuthenticated]
@@ -111,6 +112,27 @@ class DealDetailView(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
 
+
+def _perform_finalize(deal):
+    """Внутренняя логика (не эндпоинт)"""
+    with transaction.atomic():
+        if deal.deal_status == Deal.Status.RELEASED:
+            return DealSerializer(deal).data
+
+        seller = deal.seller
+        buyer = deal.buyer
+
+        buyer.escrow_balance -= deal.product_price
+        seller.balance += deal.product_price
+        
+        deal.deal_status = Deal.Status.RELEASED 
+        
+        buyer.save()
+        seller.save()
+        deal.save()
+    return DealSerializer(deal).data
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def confirm_delivery(request, pk):
@@ -123,24 +145,86 @@ def confirm_delivery(request, pk):
                        status=status.HTTP_403_FORBIDDEN)
     
     # Deal must be in SHIPPED status
-    if deal.deal_status != Deal.Status.SHIPPED:
+    if deal.deal_status not in [Deal.Status.SHIPPED, Deal.Status.DELIVERED]:
         return Response({'error': f'Deal must be in SHIPPED status, current: {deal.deal_status}'}, 
                        status=status.HTTP_400_BAD_REQUEST)
     
-    # Update deal status to DELIVERED
-    deal.deal_status = Deal.Status.DELIVERED
+    deal.buyer_confirmed = True
+    if deal.deal_status == Deal.Status.SHIPPED:
+        deal.deal_status = Deal.Status.DELIVERED
     deal.save()
     
-    # Release funds from escrow to seller
-    seller = deal.seller
-    seller.escrow_balance -= deal.product_price
-    seller.balance += deal.product_price
-    seller.save()
+    if deal.seller_confirmed:
+        final_data = _perform_finalize(deal)
+        return Response({'message': 'Deal finalized!', 'deal': final_data}, status=status.HTTP_200_OK)
     
-    # Release buyer's escrow
-    buyer = deal.buyer
-    buyer.escrow_balance -= deal.product_price
-    buyer.save()
     
     serializer = DealSerializer(deal)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response({
+        'message': 'Buyer succesfully confirmed delivery, waiting buyer confirmation',
+        'deal': serializer.data}, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def seller_confirm(request,pk):
+    deal = get_object_or_404(Deal, pk=pk)
+
+    if deal.seller != request.user:
+        return Response({'error': 'Only seller can confirm delivery'}, 
+                       status=status.HTTP_403_FORBIDDEN)
+    
+    if deal.deal_status not in [Deal.Status.SHIPPED, Deal.Status.DELIVERED]:
+        return Response({'error': f'Deal must be in SHIPPED status, current: {deal.deal_status}'}, 
+                       status=status.HTTP_400_BAD_REQUEST)
+    
+
+    deal.seller_confirmed = True
+    deal.save()
+
+    if deal.buyer_confirmed:
+        final_data = _perform_finalize(deal)
+        return Response({'message': 'Deal finalized and funds released!', 'deal': final_data}, status=status.HTTP_200_OK)
+    
+    serializer = DealSerializer(deal)
+
+    return Response({
+        'message': 'Seller confirmed the deal. Waiting seller confirmation',
+        'deal': DealSerializer(deal).data
+    }, status=status.HTTP_200_OK)
+    
+        
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def open_dispute(request, pk):
+    """Открытие спора любой из сторон"""
+    deal = get_object_or_404(Deal, pk=pk)
+
+    if request.user not in [deal.buyer, deal.seller]:
+        return Response({'error': 'You do not have permisson for deal'}, 
+                       status=status.HTTP_403_FORBIDDEN)
+    
+    # Спор можно открыть только если товар оплачен (в эскроу), но сделка еще не закрыта
+    forbidden_statuses = [Deal.Status.CREATED, Deal.Status.COMPLETED, Deal.Status.CANCELLED]
+    if deal.deal_status in forbidden_statuses:
+        return Response({'error': f'Нельзя открыть спор в статусе {deal.deal_status}'}, 
+                       status=status.HTTP_400_BAD_REQUEST)
+    
+    deal.deal_status = Deal.Status.DISPUTED # Добавьте 'DI' в Deal.Status.choices
+    deal.save()
+
+    return Response({
+        'message': 'Спор открыт. Средства заморожены до решения арбитра.',
+        'deal': DealSerializer(deal).data
+    }, status=status.HTTP_200_OK)   
+
+    
+    
+
+
+
+
+
+    
+    
+
+

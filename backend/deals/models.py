@@ -12,7 +12,8 @@ class Deal(models.Model):
         SHIPPED = 'SH', 'SHIPPED',
         DELIVERED = 'DE', 'DELIVERED',
         RELEASED = 'RE', 'RELEASED',
-        CANCELLED = 'CA', "CANCELLED"
+        CANCELLED = 'CA', "CANCELLED",
+        DISPUTED = 'DI', 'DISPUTED'
 
 
 
@@ -38,6 +39,13 @@ class Deal(models.Model):
         default=Status.CREATED
     )
     
+
+    buyer_confirmed = models.BooleanField(default=False)
+    seller_confirmed = models.BooleanField(default=False)
+
+
+
+
     # Aliases for frontend compatibility
     @property
     def title(self):
