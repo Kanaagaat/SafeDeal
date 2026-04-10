@@ -218,6 +218,33 @@ def open_dispute(request, pk):
     }, status=status.HTTP_200_OK)   
 
     
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def cancel_deal(request, pk):
+    deal = get_object_or_404(Deal, pk=pk)
+
+    
+    if request.user not in [deal.seller, deal.buyer]:
+        return Response(
+            {'error':'You do not have permission to access this deal'}, 
+            status=status.HTTP_403_FORBIDDEN)
+
+
+    if deal.deal_status not in [ Deal.Status.CREATED]:
+        return Response(
+            {'error':'You can cancel only CREATED satus deals'}, 
+            status=status.HTTP_400_BAD_REQUEST)
+    
+    deal.deal_status = Deal.Status.CANCELLED
+    deal.save()
+
+    return Response(
+        {
+            'message': 'You succesfully canceled the deal',
+            'deal': DealSerializer(deal).data
+            
+        }, status=status.HTTP_200_OK
+    )
     
 
 

@@ -5,7 +5,9 @@ from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
-
+from decimal import Decimal
+from transaction.models import Transaction
+from django.db import transaction
 # Create your views here.
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -86,40 +88,34 @@ def get_balance(request):
         'trust_score': float(user.trust_score)
     })
 
-# @api_view(['POST'])
-# @permission_classes([IsAuthenticated])
-# def add_funds(request):
-#     amount = float(request.data.get('amount', 0))
-#     if amount <= 0:
-#         return Response({'error': 'Invalid amount'}, status=400)
-    
-#     request.user.balance += amount
-#     request.user.save()
-    
-#     return Response({
-#         'balance': request.user.balance,
-#         'escrow_balance': request.user.escrow_balance
-#     })
-
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def add_funds(request):
     try:
-        amount = float(request.data.get('amount', 0))
-    except (TypeError, ValueError):
+        amount_raw = request.data.get('amount', 0)
+        amount = Decimal(str(amount_raw))
+    except (TypeError, ValueError, Decimal.InvalidOperation):
         return Response({'error': 'Invalid amount format'}, status=400)
     
     if amount <= 0:
         return Response({'error': 'Amount must be greater than 0'}, status=400)
     
-    # ✅ Исправлено: конвертируем amount в Decimal
-    from decimal import Decimal
     amount_decimal = Decimal(str(amount))
     
-    request.user.balance += amount_decimal
-    request.user.save()
+    with transaction.atomic():
+        request.user.balance += amount
+        request.user.save()
+        
+
+        Transaction.objects.create(
+            user=request.user,
+            transaction_type=Transaction.TransactionType.DEPOSIT, 
+            amount=amount,
+            # deal=None 
+        )
     
+
     return Response({
         'balance': float(request.user.balance),
         'escrow_balance': float(request.user.escrow_balance)

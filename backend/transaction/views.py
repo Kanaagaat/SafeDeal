@@ -9,6 +9,8 @@ from deals.models import Deal
 from deals.serializers import DealSerializer
 from django.contrib.auth import get_user_model
 from django.db import transaction
+from decimal import Decimal
+
 
 User = get_user_model()
 # Create your views here.
@@ -25,7 +27,7 @@ def pay(request):
         return Response({'error': 'Deal amount are required'}, status = status.HTTP_400_BAD_REQUEST)
 
     try:
-        amount = float(amount)
+        amount = Decimal(str(amount))
     except ValueError:
         return Response({'error': 'Invalid amount format'},
                         status=status.HTTP_400_BAD_REQUEST)
@@ -43,7 +45,7 @@ def pay(request):
             {'error': f'Deal must be in CREATED status. Current status {DealSerializer(deal.deal_status).data}'},
             status=status.HTTP_400_BAD_REQUEST)
     
-    if amount != float(deal.product_price):
+    if amount != deal.product_price:
         return Response(
             {'error': f'Amount must match deal price {deal.product_price}'},
             status=status.HTTP_400_BAD_REQUEST
@@ -54,12 +56,12 @@ def pay(request):
         if request.user.balance < amount:
             return Response({'error': 'Insufficient funds'}, status=400)
 
-        # 1. Логика эскроу
+
         request.user.balance -= amount
         request.user.escrow_balance += amount
         request.user.save()
 
-        # 2. Создаем транзакцию
+
         Transaction.objects.create(
             user=request.user,
             deal=deal,
@@ -67,7 +69,7 @@ def pay(request):
             amount=amount
         )
 
-        # 3. Меняем статус (теперь товар оплачен и должен быть отправлен)
+
         deal.deal_status = Deal.Status.SHIPPED
         deal.save()
 
