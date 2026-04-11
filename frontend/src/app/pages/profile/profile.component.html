@@ -61,6 +61,55 @@
             </span>
           </div>
         </div>
+        <div class="empty-state" *ngIf="profile.recentDeals.length === 0">
+          No recent deals yet.
+        </div>
+      </div>
+    </div>
+
+    <!-- Deal History -->
+    <div class="card section-card">
+      <h3 class="section-title">Deal History</h3>
+      <div *ngIf="dealHistory.length === 0" class="empty-state">
+        No history yet.
+      </div>
+      <div class="deal-history-table" *ngIf="dealHistory.length > 0">
+        <div class="table-header">
+          <span>Title</span>
+          <span>Role</span>
+          <span>Price</span>
+          <span>Status</span>
+        </div>
+        <div class="table-row" *ngFor="let deal of dealHistory">
+          <span class="table-cell" data-label="Title">{{ deal.title }}</span>
+          <span class="table-cell" data-label="Role">{{ deal.role | titlecase }}</span>
+          <span class="table-cell" data-label="Price">${{ deal.price | number }}</span>
+          <span class="table-cell" data-label="Status">
+            <span [class]="'badge badge-' + getStatusClass(deal.status)">
+              {{ getStatusLabel(deal.status) }}
+            </span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transaction History -->
+    <div class="card section-card">
+      <h3 class="section-title">Transaction History</h3>
+      <div *ngIf="transactionHistory.length === 0" class="empty-state">
+        No history yet.
+      </div>
+      <div class="transaction-history-table" *ngIf="transactionHistory.length > 0">
+        <div class="table-header">
+          <span>Type</span>
+          <span>Date</span>
+          <span>Amount</span>
+        </div>
+        <div class="table-row" *ngFor="let tx of transactionHistory">
+          <span class="table-cell" data-label="Type">{{ tx.transaction_type }}</span>
+          <span class="table-cell" data-label="Date">{{ tx.created_at | date:'mediumDate' }}</span>
+          <span class="table-cell" data-label="Amount">${{ tx.amount | number:'1.2-2' }}</span>
+        </div>
       </div>
     </div>
 

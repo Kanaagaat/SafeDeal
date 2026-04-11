@@ -34,7 +34,7 @@ export interface UserProfile {
   trustScore: number;
   completedDeals: number;
   totalVolume: number;
-  recentDeals: Deal[];
+  recentDeals: any[];
   reviews: Review[];
 }
 

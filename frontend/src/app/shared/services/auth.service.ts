@@ -90,6 +90,20 @@ export class AuthService {
   getBalance(): Observable<any> {
     return this.http.get(`${this.api}/user/balance/`);
   }
+
+  syncBalance(): Observable<any> {
+    return this.getBalance().pipe(
+      tap(res => {
+        const user = this.getCurrentUser();
+        if (user) {
+          user.balance = res.balance;
+          user.escrow_balance = res.escrow_balance;
+          this.currentUserSubject.next(user);
+          localStorage.setItem('user', JSON.stringify(user));
+        }
+      })
+    );
+  }
   
 //   updateBalance(amount: number): Observable<any> {
 //     return this.http.post<any>(`${this.api}/user/add-funds/', views.add_funds, name='add-funds'),

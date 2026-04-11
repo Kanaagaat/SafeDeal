@@ -2,8 +2,8 @@
   <div class="rating-dialog__overlay" (click)="closeDialog()"></div>
   <div class="rating-dialog__content">
     <div class="rating-header">
-      <h2>Оставить отзыв</h2>
-      <p>Оцените качество работы с {{ data.toUser }}</p>
+      <h2>Leave a review</h2>
+      <p>Rate your experience with {{ data.toUser }}</p>
     </div>
 
     <div class="rating-body" *ngIf="!submitted">
@@ -23,16 +23,16 @@
 
       <div class="rating-text">
         <span class="rating-value">{{ rating }}</span>
-        <span class="rating-label">из 5 звезд</span>
+        <span class="rating-label">out of 5 stars</span>
       </div>
 
       <div class="comment-section">
-        <label for="comment" class="comment-label">Комментарий (опционально)</label>
+        <label for="comment" class="comment-label">Comment (optional)</label>
         <textarea
           id="comment"
           [(ngModel)]="comment"
           class="comment-input"
-          placeholder="Поделитесь своим мнением (макс 500 символов)"
+          placeholder="Share your thoughts (max 500 characters)"
           maxlength="500"
           rows="4"
         ></textarea>
@@ -44,8 +44,8 @@
       <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <polyline points="20 6 9 17 4 12"></polyline>
       </svg>
-      <h3>Спасибо за отзыв!</h3>
-      <p>Ваш отзыв помогает улучшить SafeDeal</p>
+      <h3>Thank you for your feedback!</h3>
+      <p>Your review helps improve SafeDeal</p>
     </div>
 
     <div class="rating-actions" *ngIf="!submitted">
@@ -55,20 +55,20 @@
         [disabled]="isSubmitting"
       >
         <span *ngIf="isSubmitting" class="spinner"></span>
-        {{ isSubmitting ? 'Отправка...' : 'Отправить отзыв' }}
+        {{ isSubmitting ? 'Sending...' : 'Submit review' }}
       </button>
       <button
         class="btn-secondary"
         (click)="closeDialog()"
         [disabled]="isSubmitting"
       >
-        Пропустить
+        Skip
       </button>
     </div>
 
     <div class="rating-actions" *ngIf="submitted">
       <button class="btn-primary" (click)="closeDialog()">
-        Закрыть
+        Close
       </button>
     </div>
   </div>

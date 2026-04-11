@@ -3,6 +3,8 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractContro
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../shared/services/auth.service';
+import { ToastService } from '../../shared/services/toast.service';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-register',
@@ -19,6 +21,7 @@ export class RegisterComponent {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
+    private toastService: ToastService,
     private router: Router
   ) {
     this.registerForm = this.fb.group({
@@ -51,33 +54,35 @@ export class RegisterComponent {
         last_name: this.registerForm.get('lastName')?.value
       };
 
-      this.authService.register(formData).subscribe({
+      this.authService.register(formData).pipe(
+        finalize(() => this.isLoading = false)
+      ).subscribe({
         next: () => {
-          this.isLoading = false;
           this.router.navigate(['/dashboard']);
+          this.toastService.success('Registration successful. Welcome to SafeDeal!');
         },
         error: (error) => {
-          this.isLoading = false;
-          
+          let errorMessage = 'Registration failed. Please try again.';
+
           if (error.error && typeof error.error === 'object') {
-            // Handle validation errors
             const errors = error.error;
-            let errorMessage = '';
-            
+            const messages: string[] = [];
+
             if (errors.username) {
-              errorMessage += (Array.isArray(errors.username) ? errors.username[0] : errors.username) + '. ';
+              messages.push(Array.isArray(errors.username) ? errors.username[0] : errors.username);
             }
             if (errors.email) {
-              errorMessage += (Array.isArray(errors.email) ? errors.email[0] : errors.email) + '. ';
+              messages.push(Array.isArray(errors.email) ? errors.email[0] : errors.email);
             }
             if (errors.password) {
-              errorMessage += (Array.isArray(errors.password) ? errors.password[0] : errors.password) + '. ';
+              messages.push(Array.isArray(errors.password) ? errors.password[0] : errors.password);
             }
-            
-            this.errorMessage = errorMessage.trim() || 'Ошибка при регистрации';
-          } else {
-            this.errorMessage = 'Ошибка при регистрации. Попробуйте снова.';
+
+            errorMessage = messages.filter(Boolean).join('. ') || errorMessage;
           }
+
+          this.errorMessage = errorMessage;
+          this.toastService.error(errorMessage);
         }
       });
     }

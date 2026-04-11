@@ -55,11 +55,37 @@
         </div>
 
         <div class="deal-actions">
-          <button (click)="confirmDelivery(deal)" class="action-button confirm-button">
-            Confirm Delivery
+          <button *ngIf="isPayVisible(deal)"
+                  (click)="pay(deal)"
+                  class="action-button pay-button">
+            Pay
           </button>
-          <button (click)="openDispute(deal)" class="action-button dispute-button">
-            Open Dispute
+
+          <button *ngIf="isCancelVisible(deal)"
+                  (click)="cancelDeal(deal)"
+                  class="action-button cancel-button">
+            Cancel Deal
+          </button>
+
+          <button *ngIf="isConfirmDeliveryVisible(deal)"
+                  (click)="confirmDelivery(deal)"
+                  [disabled]="!!deal.buyer_confirmed && !deal.seller_confirmed"
+                  class="action-button confirm-button">
+            {{ getConfirmDeliveryLabel(deal) }}
+          </button>
+
+          <button *ngIf="isSellerConfirmVisible(deal)"
+                  (click)="sellerConfirm(deal)"
+                  [disabled]="!!deal.seller_confirmed && !deal.buyer_confirmed"
+                  class="action-button confirm-button">
+            {{ getSellerConfirmLabel(deal) }}
+          </button>
+
+          <button *ngIf="isOpenDisputeVisible(deal)"
+                  (click)="openDispute(deal)"
+                  [disabled]="getDealStatus(deal) === 'DISPUTED'"
+                  class="action-button dispute-button">
+            {{ getOpenDisputeLabel(deal) }}
           </button>
         </div>
       </div>

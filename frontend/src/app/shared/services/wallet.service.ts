@@ -19,8 +19,8 @@ export class WalletService {
     return this.http.post(`${this.api}/add-funds/`, { amount });
   }
 
-  payForDeal(dealId: number): Observable<any> {
-    return this.http.post(`${this.api}/transactions/pay/`, { deal_id: dealId });
+  payForDeal(dealId: number, amount: number): Observable<any> {
+    return this.http.post(`${this.api}/transactions/pay/`, { deal_id: dealId, amount });
   }
 
   confirmDeal(dealId: number): Observable<any> {

@@ -18,6 +18,10 @@
     text-decoration: none;
   }
 
+  &__brand--static {
+    cursor: default;
+  }
+
   &__logo-text {
     font-size: 18px;
     font-weight: 700;
@@ -25,10 +29,35 @@
     letter-spacing: -0.3px;
   }
 
+  &__hamburger {
+    display: none;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: 8px;
+    border-radius: 4px;
+
+    &:hover {
+      background: var(--bg);
+    }
+  }
+
   &__links {
     display: flex;
     align-items: center;
     gap: 4px;
+
+    &--open {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      flex-direction: column;
+      padding: 16px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
   }
 
   &__link {
@@ -95,6 +124,36 @@
     &:hover {
       background: #fef2f2 !important;
       color: #dc2626 !important;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0 16px;
+
+    &__hamburger {
+      display: block;
+    }
+
+    &__links {
+      display: none;
+
+      &--open {
+        display: flex;
+      }
+    }
+
+    &__auth {
+      gap: 8px;
+    }
+
+    &__balance {
+      display: none;
+    }
+
+    &__user {
+      display: none;
     }
   }
 }

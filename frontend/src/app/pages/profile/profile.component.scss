@@ -193,6 +193,122 @@
   gap: 2px;
 }
 
+@media (max-width: 768px) {
+  .profile-wrapper {
+    padding: 0 16px;
+  }
+
+  .profile-hero {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 24px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .recent-deal,
+  .history-row,
+  .transaction-row,
+  .review {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .recent-deal__right {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .history-row,
+  .transaction-row {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .history-row__right,
+  .transaction-amount {
+    align-self: flex-start;
+  }
+}
+
+/* Tables */
+.deal-history-table,
+.transaction-history-table {
+  overflow-x: auto;
+}
+
+.table-header {
+  display: none; /* Hide on mobile, show as cards */
+}
+
+.table-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.table-cell {
+  flex: 1;
+  text-align: left;
+  font-size: 14px;
+}
+
+.table-cell:last-child {
+  text-align: right;
+}
+
+@media (max-width: 768px) {
+  .deal-history-table,
+  .transaction-history-table {
+    .table-header {
+      display: none;
+    }
+
+    .table-row {
+      flex-direction: column;
+      gap: 8px;
+      padding: 16px;
+      background: var(--bg);
+      border-radius: var(--radius);
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .table-cell {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      padding: 4px 0;
+
+      &:before {
+        content: attr(data-label) ": ";
+        font-weight: 600;
+        color: var(--text-secondary);
+      }
+    }
+  }
+
+  .deal-history-table .table-row .table-cell:nth-child(1):before { content: "Title: "; }
+  .deal-history-table .table-row .table-cell:nth-child(2):before { content: "Role: "; }
+  .deal-history-table .table-row .table-cell:nth-child(3):before { content: "Price: "; }
+  .deal-history-table .table-row .table-cell:nth-child(4):before { content: "Status: "; }
+
+  .transaction-history-table .table-row .table-cell:nth-child(1):before { content: "Type: "; }
+  .transaction-history-table .table-row .table-cell:nth-child(2):before { content: "Date: "; }
+  .transaction-history-table .table-row .table-cell:nth-child(3):before { content: "Amount: "; }
+}
+
 /* Loading */
 .skeleton {
   background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);

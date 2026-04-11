@@ -109,3 +109,26 @@
 
   a { color: var(--primary); }
 }
+
+@media (max-width: 768px) {
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .deal-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 18px;
+  }
+
+  .deal-card__parties {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .deal-card__right {
+    align-items: flex-start;
+  }
+}

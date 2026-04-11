@@ -37,6 +37,19 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+  min-height: 100vh;
+}
+
+@media (min-width: 768px) {
+  .page-container {
+    padding: 3rem;
+  }
+}
+
 a {
   text-decoration: none;
   color: inherit;
@@ -47,6 +60,17 @@ button {
   cursor: pointer;
   border: none;
   outline: none;
+  min-height: 44px;
+  padding: 12px 24px;
+  border-radius: var(--radius);
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
 }
 
 input, textarea {

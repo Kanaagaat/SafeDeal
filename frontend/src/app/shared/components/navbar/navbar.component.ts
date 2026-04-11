@@ -16,6 +16,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   currentUser: any = null;
   balance: number = 0;
   escrowBalance: number = 0;
+  menuOpen = false;
   private subscription: Subscription = new Subscription();
 
   constructor(private authService: AuthService, private router: Router) {}
@@ -44,6 +45,14 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
+  }
+
+  toggleMenu(): void {
+    this.menuOpen = !this.menuOpen;
+  }
+
+  closeMenu(): void {
+    this.menuOpen = false;
   }
 
   logout(): void {

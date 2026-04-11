@@ -167,6 +167,24 @@
   transition: all 0.2s;
 }
 
+.pay-button {
+  background: #27ae60;
+  color: white;
+}
+
+.pay-button:hover {
+  background: #2ecc71;
+}
+
+.cancel-button {
+  background: #6b7280;
+  color: white;
+}
+
+.cancel-button:hover {
+  background: #4b5563;
+}
+
 .confirm-button {
   background: #10b981;
   color: white;

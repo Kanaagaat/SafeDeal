@@ -3,6 +3,8 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../shared/services/auth.service';
+import { ToastService } from '../../shared/services/toast.service';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -19,6 +21,7 @@ export class LoginComponent {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
+    private toastService: ToastService,
     private router: Router
   ) {
     this.loginForm = this.fb.group({
@@ -34,17 +37,20 @@ export class LoginComponent {
 
       const { username, password } = this.loginForm.value;
 
-      this.authService.login(username, password).subscribe({
+      this.authService.login(username, password).pipe(
+        finalize(() => this.isLoading = false)
+      ).subscribe({
         next: () => {
-          this.isLoading = false;
           this.router.navigate(['/dashboard']);
+          this.toastService.success('Successfully signed in.');
         },
         error: (error) => {
-          this.isLoading = false;
           if (error.status === 400 || error.status === 401) {
-            this.errorMessage = 'Неверный логин или пароль';
+            this.errorMessage = 'Wrong username or password';
+            this.toastService.error('Wrong username or password');
           } else {
-            this.errorMessage = 'Произошла ошибка. Попробуйте позже.';
+            this.errorMessage = 'Something went wrong. Please try again.';
+            this.toastService.error('Login failed. Please try again later.');
           }
         }
       });

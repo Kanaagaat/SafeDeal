@@ -13,7 +13,7 @@ export class JwtInterceptor implements HttpInterceptor {
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const token = this.authService.getToken();
     
-    // Не добавляем токен для запросов логина/регистрации
+    // Do not add token for login/register requests
     const isAuthRequest = req.url.includes('/login/') || req.url.includes('/register/');
     
     if (token && !isAuthRequest) {

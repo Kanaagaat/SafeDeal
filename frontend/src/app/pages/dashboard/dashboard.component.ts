@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { DealService, Deal } from '../../shared/services/deal.service';
 import { AuthService } from '../../shared/services/auth.service';
+import { take } from 'rxjs';
 
 interface DealWithRole extends Deal {
   role: 'buyer' | 'seller';
@@ -22,7 +23,14 @@ export class DashboardComponent implements OnInit {
   constructor(private dealService: DealService, private authService: AuthService) {}
 
   ngOnInit(): void {
-    this.loadDeals();
+    const currentUser = this.authService.getCurrentUser();
+    if (currentUser) {
+      this.loadDeals();
+    } else {
+      this.authService.currentUser$.pipe(take(1)).subscribe(() => {
+        this.loadDeals();
+      });
+    }
   }
 
   loadDeals(): void {
@@ -54,6 +62,7 @@ export class DashboardComponent implements OnInit {
       'SH': 'shipped',
       'DE': 'delivered',
       'RE': 'completed',
+      'DI': 'warning',
       'CA': 'cancelled'
     };
     return map[status] || 'pending';
@@ -67,6 +76,7 @@ export class DashboardComponent implements OnInit {
       'SH': 'Shipped',
       'DE': 'Delivered',
       'RE': 'Released',
+      'DI': 'Disputed',
       'CA': 'Cancelled'
     };
     return map[status] || status;

@@ -10,6 +10,9 @@ export interface Deal {
   description: string;
   price: number;
   status: string;
+  deal_status?: string;
+  buyer_confirmed?: boolean;
+  seller_confirmed?: boolean;
   created_at: string;
   updated_at: string;
   buyer: {
@@ -61,6 +64,14 @@ export class DealService {
     return this.http.post<Deal>(`${this.api}/deals/${id}/confirm-delivery/`, {});
   }
 
+  sellerConfirm(id: number): Observable<Deal> {
+    return this.http.post<Deal>(`${this.api}/deals/${id}/seller-confirm/`, {});
+  }
+
+  openDispute(id: number): Observable<Deal> {
+    return this.http.post<Deal>(`${this.api}/deals/${id}/open-dispute/`, {});
+  }
+
   createRating(rating: Rating): Observable<Rating> {
     return this.http.post<Rating>(`${this.api}/ratings/`, rating);
   }
@@ -70,6 +81,6 @@ export class DealService {
   }
 
   cancelDeal(id: number): Observable<any> {
-    return this.http.delete(`${this.api}/deals/${id}/`);
+    return this.http.post<any>(`${this.api}/deals/${id}/cancel/`, {});
   }
 }

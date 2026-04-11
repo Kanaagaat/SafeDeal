@@ -7,7 +7,7 @@
 
 .balance-grid {
   display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 16px;
   margin-bottom: 22px;
 }
@@ -66,6 +66,8 @@
 
 .add-funds-btn {
   margin-bottom: 28px;
+  width: 100%;
+  max-width: 260px;
 }
 
 .transactions-card {
@@ -221,6 +223,18 @@
 @keyframes shimmer {
   0%   { background-position: -200% 0; }
   100% { background-position: 200% 0; }
+}
+
+@media (max-width: 768px) {
+  .balance-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal {
+    width: min(100%, 420px);
+    margin: 0 16px;
+    padding: 24px;
+  }
 }
 
 @keyframes fadeIn  { from { opacity: 0 } to { opacity: 1 } }

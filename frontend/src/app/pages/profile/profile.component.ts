@@ -2,7 +2,15 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule, TitleCasePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../shared/services/auth.service';
-import { UserProfile, DealStatus } from '../../shared/models/models';
+import { DealService, Deal } from '../../shared/services/deal.service';
+import { TransactionService, TransactionRecord } from '../../shared/services/transaction.service';
+import { ToastService } from '../../shared/services/toast.service';
+import { UserProfile } from '../../shared/models/models';
+import { forkJoin, finalize } from 'rxjs';
+
+interface DealWithRole extends Deal {
+  role: 'buyer' | 'seller';
+}
 
 @Component({
   selector: 'app-profile',
@@ -14,8 +22,15 @@ import { UserProfile, DealStatus } from '../../shared/models/models';
 export class ProfileComponent implements OnInit {
   profile: UserProfile | null = null;
   loading = true;
+  dealHistory: DealWithRole[] = [];
+  transactionHistory: TransactionRecord[] = [];
 
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private dealService: DealService,
+    private transactionService: TransactionService,
+    private toastService: ToastService
+  ) {}
 
   ngOnInit(): void {
     this.loadProfile();
@@ -23,37 +38,43 @@ export class ProfileComponent implements OnInit {
 
   loadProfile(): void {
     this.loading = true;
-    const user = this.authService.getCurrentUser();
-    if (user) {
-      this.profile = {
-        username: user.username,
-        memberSince: 'Member',
-        avatar: user.username.charAt(0).toUpperCase(),
-        trustScore: user.trust_score || 0,
-        completedDeals: 0,
-        totalVolume: 0,
-        recentDeals: [],
-        reviews: []
-      };
-    }
-    
-    this.authService.getProfile().subscribe({
-      next: (userData: any) => {
+
+    forkJoin({
+      profile: this.authService.getProfile(),
+      deals: this.dealService.getDeals(),
+      transactions: this.transactionService.getTransactions()
+    }).pipe(
+      finalize(() => this.loading = false)
+    ).subscribe({
+      next: ({ profile, deals, transactions }) => {
+        const completedDeals = deals.filter(deal => deal.deal_status === 'DE' || deal.deal_status === 'RE' || deal.deal_status === 'DELIVERED' || deal.deal_status === 'RELEASED').length;
+        const totalVolume = deals.reduce((sum, deal) => sum + (Number(deal.price) || 0), 0);
+        const recentDeals = deals.slice(-3).reverse();
+
         this.profile = {
-          username: userData.username,
-          memberSince: 'Member',
-          avatar: userData.username.charAt(0).toUpperCase(),
-          trustScore: userData.trust_score || 0,
-          completedDeals: 0,
-          totalVolume: 0,
-          recentDeals: [],
+          username: profile.username,
+          memberSince: profile.date_joined ? new Date(profile.date_joined).toLocaleDateString(undefined, {
+            month: 'long',
+            year: 'numeric'
+          }) : 'Member',
+          avatar: profile.username.charAt(0).toUpperCase(),
+          trustScore: profile.trust_score || 0,
+          completedDeals,
+          totalVolume,
+          recentDeals,
           reviews: []
         };
-        this.loading = false;
+
+        this.dealHistory = deals.map(deal => ({
+          ...deal,
+          role: deal.buyer.username === profile.username ? 'buyer' : 'seller'
+        }));
+
+        this.transactionHistory = transactions || [];
       },
       error: (error) => {
-        console.error('Error loading profile:', error);
-        this.loading = false;
+        console.error('Error loading profile or history:', error);
+        this.toastService.error('Unable to load profile history. Please try again later.');
       }
     });
   }
@@ -71,21 +92,31 @@ export class ProfileComponent implements OnInit {
     return Array(5 - Math.floor(rating)).fill(0);
   }
 
-  getStatusClass(status: DealStatus): string {
-    const map: Record<DealStatus, string> = {
-      money_secured: 'secured', shipped: 'shipped',
-      payment_pending: 'pending', completed: 'completed',
-      in_progress: 'progress', cancelled: 'pending'
+  getStatusClass(status: string): string {
+    const map: Record<string, string> = {
+      CR: 'pending',
+      PA: 'pending',
+      SE: 'secured',
+      SH: 'shipped',
+      DE: 'delivered',
+      RE: 'completed',
+      DI: 'warning',
+      CA: 'cancelled'
     };
-    return map[status];
+    return map[status] || 'pending';
   }
 
-  getStatusLabel(status: DealStatus): string {
-    const map: Record<DealStatus, string> = {
-      money_secured: 'Money Secured', shipped: 'Shipped',
-      payment_pending: 'Payment Pending', completed: 'Completed',
-      in_progress: 'In Progress', cancelled: 'Cancelled'
+  getStatusLabel(status: string): string {
+    const map: Record<string, string> = {
+      CR: 'Created',
+      PA: 'Paid',
+      SE: 'Secured',
+      SH: 'Shipped',
+      DE: 'Delivered',
+      RE: 'Released',
+      DI: 'Disputed',
+      CA: 'Cancelled'
     };
-    return map[status];
+    return map[status] || status;
   }
 }
