@@ -7,6 +7,8 @@ from .models import Rating
 from .serializers import RatingSerializer
 from deals.models import Deal
 from django.contrib.auth import get_user_model
+from django.db import transaction
+
 
 User = get_user_model()
 
@@ -26,7 +28,7 @@ class RatingListCreateView(APIView):
         
         user = get_object_or_404(User, id=user_id)
 
-        ratings = Rating.objects.filter(reviewed_user = user).order_by('created_at')
+        ratings = Rating.objects.filter(reviewed_user = user).order_by('-created_at')
 
         serializer = RatingSerializer(ratings, many=True)
 
@@ -52,7 +54,7 @@ class RatingListCreateView(APIView):
         
         deal = get_object_or_404(Deal, id=deal_id)
 
-        if deal.deal_status != Deal.Status.DELIVERED:
+        if deal.deal_status not in [Deal.Status.DELIVERED, Deal.Status.RELEASED]:
             return Response(
                 {'error': 'Can only rate DELIVERED deals'},
                 status=status.HTTP_400_BAD_REQUEST
@@ -71,28 +73,30 @@ class RatingListCreateView(APIView):
 
         rating_data = {
             'deal': deal_id,
-            'rating': rating_value,
+            'score': rating_value,
             'comment': comment
         }
 
-        serializer = RatingSerializer(rating_data)
+        serializer = RatingSerializer(data=rating_data)
 
         if serializer.is_valid():
-            rating = serializer.save(
-                reviewer = request.user,
-                reviewed_user = deal.seller,
-            )
+            with transaction.atomic(): 
+                rating = serializer.save(
+                    reviewer=request.user,
+                    reviewed_user=deal.seller,
+                )
 
 
             seller = deal.seller
 
             all_ratings = Rating.objects.filter(reviewed_user=seller)
 
-            avg_rating = sum(r.rating for r in all_ratings)/len(all_ratings)
+            count = all_ratings.count()
 
-            seller.trust_score = round(avg_rating, 1)
-            seller.save()
-
+            if count > 0:
+                    avg_rating = sum(r.score for r in all_ratings) / count
+                    seller.trust_score = round(avg_rating, 1)
+                    seller.save()
 
             return Response(
                 RatingSerializer(rating).data,

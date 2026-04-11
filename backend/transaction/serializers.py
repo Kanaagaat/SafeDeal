@@ -20,4 +20,4 @@ class TransactionSerializer(serializers.ModelSerializer):
             'deal', 
             'deal_id', 
             'created_at']
-        read_only_fields='__all__'
+        read_only_fields=[]

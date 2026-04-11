@@ -160,6 +160,14 @@ def confirm(request):
         },
         status=status.HTTP_200_OK
     )
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def transaction_history(request):
+    transactions = Transaction.objects.filter(user=request.user).order_by('-created_at')
+    serializer = TransactionSerializer(transactions, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
         
 
 

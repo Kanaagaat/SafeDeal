@@ -196,24 +196,24 @@ def seller_confirm(request,pk):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def open_dispute(request, pk):
-    """Открытие спора любой из сторон"""
+    """Open dispute for any party"""
     deal = get_object_or_404(Deal, pk=pk)
 
     if request.user not in [deal.buyer, deal.seller]:
-        return Response({'error': 'You do not have permisson for deal'}, 
+        return Response({'error': 'You do not have permission for this deal'}, 
                        status=status.HTTP_403_FORBIDDEN)
     
-    # Спор можно открыть только если товар оплачен (в эскроу), но сделка еще не закрыта
+    # Dispute can be opened only if item is paid (in escrow), but deal is not closed
     forbidden_statuses = [Deal.Status.CREATED, Deal.Status.COMPLETED, Deal.Status.CANCELLED]
     if deal.deal_status in forbidden_statuses:
-        return Response({'error': f'Нельзя открыть спор в статусе {deal.deal_status}'}, 
+        return Response({'error': f'Cannot open dispute in status {deal.deal_status}'}, 
                        status=status.HTTP_400_BAD_REQUEST)
     
-    deal.deal_status = Deal.Status.DISPUTED # Добавьте 'DI' в Deal.Status.choices
+    deal.deal_status = Deal.Status.DISPUTED # Add 'DI' to Deal.Status.choices
     deal.save()
 
     return Response({
-        'message': 'Спор открыт. Средства заморожены до решения арбитра.',
+        'message': 'Dispute opened. Funds frozen until arbitrator decision.',
         'deal': DealSerializer(deal).data
     }, status=status.HTTP_200_OK)   
 

@@ -21,7 +21,7 @@ class Rating(models.Model):
         related_name='deal_rating'
     )
 
-    score = models.DecimalField(max_digits=2, decimal_places=2, default=5.0)
+    score = models.PositiveSmallIntegerField( default=5)
     created_at = models.DateTimeField(auto_now_add=True)
     comment = models.TextField(blank=True)
 

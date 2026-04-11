@@ -8,4 +8,5 @@ urlpatterns = [
     path('deals/<int:pk>/seller-confirm/', views.seller_confirm, name='seller-confirm'),
     path('deals/<int:pk>/open-dispute/', views.open_dispute, name='open-dispute'),
     path('deals/<int:pk>/cancel-deal/', views.cancel_deal, name='cancel-deal'),
+    path('deals/<int:pk>/cancel/', views.cancel_deal, name='cancel-deal-short'),
 ]
