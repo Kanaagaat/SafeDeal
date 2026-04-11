@@ -60,7 +60,7 @@ This helps prevent common online scams where:
 | :--- | :--- |
 | **Frontend** | Angular |
 | **Backend** | Django + Django REST Framework |
-| **Database** | PostgreSQL |
+| **Database** | SQLite |
 | **Auth** | JWT (JSON Web Token) |
 
 ---
@@ -111,21 +111,67 @@ The frontend will be available at: `http://localhost:4200`
 
 ## 📡 API Overview
 
-### Authentication
-* `POST /api/register` — Create a new account
-* `POST /api/login` — Obtain JWT access tokens
+### 🔐 Authentication
+| Method | Endpoint | Description |
+|:--- |:--- |:--- |
+| `POST` | `/api/register/` | Create a new account & receive JWT tokens |
+| `POST` | `/api/login/` | Authenticate & obtain JWT access/refresh tokens |
+| `POST` | `/api/logout/` | Blacklist refresh token to end session |
+| `POST` | `/api/token/refresh/` | Refresh expired access tokens |
 
-### Deals
-* `GET /api/deals` — List all user deals
-* `POST /api/deals` — Initiate a new deal
-* `PUT /api/deals/{id}` — Update deal status
-* `DELETE /api/deals/{id}` — Cancel a deal
+### 👤 User & Wallet
+| Method | Endpoint | Description |
+|:--- |:--- |:--- |
+| `GET` | `/api/user/profile/` | Get current user details & trust score |
+| `GET` | `/api/user/balance/` | View `balance` and `escrow_balance` |
+| `POST` | `/api/user/add-funds/` | Deposit money to personal balance |
 
-### Transactions
-* `POST /api/deals/{id}/pay` — Deposit money into escrow
-* `POST /api/deals/{id}/confirm` — Release money to seller
+### 🤝 Deal Management
+| Method | Endpoint | Description |
+|:--- |:--- |:--- |
+| `GET` | `/api/deals/` | List all deals (as Buyer or Seller) |
+| `POST` | `/api/deals/` | Initiate a new deal as a Seller |
+| `GET` | `/api/deals/{id}/` | Get full deal details & status |
+| `POST` | `/api/deals/{id}/cancel-deal/` | Cancel a deal (Only if status is `CREATED`) |
+| `POST` | `/api/deals/{id}/open-dispute/` | Raise a dispute for an active deal |
+
+### 💸 Transactions (Escrow Flow)
+| Method | Endpoint | Description |
+|:--- |:--- |:--- |
+| `GET` | `/api/transactions/` | View full history of all financial movements |
+| `POST` | `/api/transactions/pay/` | **Buyer:** Move funds from balance to Escrow |
+| `POST` | `/api/transactions/confirm/` | **Buyer:** Release Escrow funds to the Seller |
+
+### ⭐️ Ratings & Reputation
+| Method | Endpoint | Description |
+|:--- |:--- |:--- |
+| `GET` | `/api/ratings/?user_id={id}` | Get all feedback for a specific user |
+| `POST` | `/api/ratings/` | Rate the seller (Allowed after deal completion) |
 
 ---
+
+## 🛠 Technical Implementation Details
+
+### **Financial Security**
+- **Escrow Logic:** When a buyer "Pays," funds are locked in the `escrow_balance`. Neither the buyer nor the seller can withdraw these funds until the deal is `COMPLETED` or `CANCELLED`.
+- **Atomic Transactions:** All balance updates are wrapped in `transaction.atomic()` to prevent data corruption during server errors.
+- **Precision:** Uses `DecimalField` for all currency values to prevent floating-point rounding errors.
+
+### **Deal Lifecycle**
+1. **CREATED:** Deal is listed but not yet funded.
+2. **SHIPPED:** Buyer has funded the escrow; seller is expected to deliver.
+3. **DELIVERED:** Product received; waiting for final buyer confirmation.
+4. **COMPLETED:** Funds released to Seller; deal archived.
+5. **DISPUTED:** Admin intervention required.
+
+### **Authentication**
+All protected endpoints require the following header:
+`Authorization: Bearer <your_access_token>`
+
+---
+
+
+
 
 ## 📊 Database Models
 
