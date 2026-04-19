@@ -1,0 +1,130 @@
+<div class="min-h-screen bg-mesh text-deal-text">
+  <header class="border-b border-white/5 backdrop-blur-md sticky top-0 z-20">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+      <span class="font-heading font-bold text-xl tracking-tight text-white">SafeDeal</span>
+      <a
+        routerLink="/auth"
+        class="rounded-xl px-4 py-2 text-sm font-semibold bg-primary text-white hover:bg-primary-light transition"
+        >Get Started</a
+      >
+    </div>
+  </header>
+
+  <section class="max-w-6xl mx-auto px-4 pt-16 pb-24 md:pt-24 md:pb-32">
+    <div #reveal class="reveal max-w-3xl">
+      <p class="text-accent text-sm font-semibold tracking-widest uppercase mb-4">Escrow you can trust</p>
+      <h1 class="font-heading text-4xl md:text-6xl font-extrabold leading-tight text-white mb-6">
+        Secure Deals. Zero Risk.
+      </h1>
+      <p class="text-deal-muted text-lg md:text-xl leading-relaxed mb-10 max-w-2xl">
+        Hold funds in escrow, ship with confidence, and release payment only when milestones are met — all in one
+        place.
+      </p>
+      <a
+        routerLink="/auth"
+        class="inline-flex items-center justify-center rounded-2xl px-8 py-4 text-base font-bold bg-primary text-white shadow-lg shadow-primary/30 hover:bg-primary-light transition"
+        >Get Started</a
+      >
+    </div>
+  </section>
+
+  <section class="border-t border-white/5 py-20 md:py-28">
+    <div class="max-w-6xl mx-auto px-4">
+      <div #reveal class="reveal">
+        <h2 class="font-heading text-3xl md:text-4xl font-bold text-white mb-4">Who We Are</h2>
+        <p class="text-deal-muted text-lg max-w-3xl leading-relaxed">
+          SafeDeal is a trusted escrow intermediary for peer-to-peer commerce. We focus on clarity, fair milestones, and
+          transparent balances so buyers and sellers can transact without taking unnecessary risk.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-20 md:py-28 bg-black/15 border-y border-white/5">
+    <div class="max-w-6xl mx-auto px-4">
+      <h2 #reveal class="reveal font-heading text-3xl md:text-4xl font-bold text-white mb-12 text-center">
+        Problems We Solve
+      </h2>
+      <div class="grid md:grid-cols-3 gap-6">
+        <article #reveal class="reveal rounded-2xl bg-surface-card/90 border border-white/10 p-8">
+          <h3 class="font-heading text-xl font-bold text-white mb-3">Buyer Protection</h3>
+          <p class="text-deal-muted leading-relaxed">
+            Your payment stays in escrow until delivery is confirmed, so sellers cannot disappear after taking your
+            money.
+          </p>
+        </article>
+        <article #reveal class="reveal rounded-2xl bg-surface-card/90 border border-white/10 p-8">
+          <h3 class="font-heading text-xl font-bold text-white mb-3">Seller Guarantee</h3>
+          <p class="text-deal-muted leading-relaxed">
+            Once escrow is funded, the buyer is committed. Ship with confidence knowing funds are secured for release
+            when obligations are met.
+          </p>
+        </article>
+        <article #reveal class="reveal rounded-2xl bg-surface-card/90 border border-white/10 p-8">
+          <h3 class="font-heading text-xl font-bold text-white mb-3">Dispute Resolution</h3>
+          <p class="text-deal-muted leading-relaxed">
+            If something goes wrong, disputes can be opened while funds remain frozen until a fair outcome is reached.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-20 md:py-28">
+    <div class="max-w-6xl mx-auto px-4">
+      <h2 #reveal class="reveal font-heading text-3xl md:text-4xl font-bold text-white mb-12">How It Works</h2>
+      <ol class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <li
+          *ngFor="let s of steps"
+          #reveal
+          class="reveal flex gap-4 rounded-2xl border border-white/10 bg-surface-card/60 p-6"
+        >
+          <span
+            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/30 text-accent font-heading font-bold"
+            >{{ s.n }}</span
+          >
+          <div>
+            <h3 class="font-heading font-bold text-white mb-1">{{ s.title }}</h3>
+            <p class="text-deal-muted text-sm leading-relaxed">{{ s.body }}</p>
+          </div>
+        </li>
+      </ol>
+      <p class="mt-8 text-deal-muted text-sm max-w-2xl">
+        Status flow on the platform follows the deal lifecycle:
+        <span class="text-accent font-semibold">CREATED → SHIPPED → DELIVERED → RELEASED</span>
+        with optional dispute handling when needed.
+      </p>
+    </div>
+  </section>
+
+  <section class="py-20 md:py-28 border-t border-white/5 bg-black/10">
+    <div class="max-w-3xl mx-auto px-4">
+      <h2 #reveal class="reveal font-heading text-3xl font-bold text-white mb-8 text-center">FAQ</h2>
+      <div class="space-y-3">
+        <div
+          *ngFor="let f of faqs; let i = index"
+          #reveal
+          class="reveal rounded-xl border border-white/10 bg-surface-card/80 overflow-hidden"
+        >
+          <button
+            type="button"
+            class="w-full text-left px-5 py-4 flex justify-between items-center gap-4 text-white font-semibold hover:bg-white/5 transition"
+            (click)="toggleFaq(i)"
+          >
+            {{ f.q }}
+            <span class="text-accent text-xl leading-none">{{ faqOpen === i ? '−' : '+' }}</span>
+          </button>
+          <div *ngIf="faqOpen === i" class="px-5 pb-4 text-deal-muted text-sm leading-relaxed border-t border-white/5">
+            {{ f.a }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="border-t border-white/10 py-12 text-center text-deal-muted text-sm">
+    <p class="font-heading text-white font-semibold mb-2">SafeDeal</p>
+    <p>Team credits — built with care for secure peer-to-peer escrow.</p>
+    <p class="mt-4">&copy; {{ year }} SafeDeal. All rights reserved.</p>
+  </footer>
+</div>

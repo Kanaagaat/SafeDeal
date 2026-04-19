@@ -1,88 +1,73 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { AuthService } from '../../shared/services/auth.service';
-
-interface WalletData {
-  balance: number;
-  escrow_balance: number;
-  trust_score: number;
-}
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { WalletService } from '../../core/services/wallet.service';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-wallet',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './wallet.component.html',
   styleUrls: ['./wallet.component.scss']
 })
 export class WalletComponent implements OnInit {
-  wallet: WalletData | null = null;
-  loading = true;
-  showAddFunds = false;
-  addAmount: number | null = null;
+  private readonly wallet = inject(WalletService);
+  private readonly toast = inject(ToastService);
+  private readonly fb = inject(FormBuilder);
 
-  constructor(private authService: AuthService) {}
+  readonly loading = signal(true);
+  balance = 0;
+  escrow = 0;
+  readonly modalOpen = signal(false);
+  readonly submitting = signal(false);
+
+  form = this.fb.nonNullable.group({
+    amount: ['', [Validators.required, Validators.pattern(/^\d+(\.\d{1,2})?$/)]]
+  });
 
   ngOnInit(): void {
-    this.loadWallet();
+    this.refresh();
   }
 
-  loadWallet(): void {
-    this.loading = true;
-    const user = this.authService.getCurrentUser();
-    if (user) {
-      this.wallet = {
-        balance: user.balance || 0,
-        escrow_balance: user.escrow_balance || 0,
-        trust_score: user.trust_score || 0
-      };
-      this.loading = false;
-    } else {
-      // Try to get from API if not in currentUser
-      this.authService.getProfile().subscribe({
-        next: (user) => {
-          this.wallet = {
-            balance: user.balance || 0,
-            escrow_balance: user.escrow_balance || 0,
-            trust_score: user.trust_score || 0
-          };
-          this.loading = false;
-        },
-        error: (error) => {
-          console.error('Error loading wallet:', error);
-          this.loading = false;
-        }
-      });
-    }
-    
-    // Subscribe to balance updates
-    this.authService.getBalance().subscribe({
-      next: (data) => {
-        if (this.wallet) {
-          this.wallet.balance = data.balance || 0;
-          this.wallet.escrow_balance = data.escrow_balance || 0;
-        }
+  refresh(): void {
+    this.loading.set(true);
+    this.wallet.refreshBalance().subscribe({
+      next: (b) => {
+        this.balance = b.balance;
+        this.escrow = b.escrow_balance;
+        this.loading.set(false);
       },
-      error: (error) => console.error('Error syncing balance:', error)
+      error: () => this.loading.set(false)
     });
   }
 
-  onAddFunds(): void {
-    if (!this.addAmount || !this.wallet) return;
-    
-    this.authService.updateBalance(this.addAmount).subscribe({
-      next: (res) => {
-        if (this.wallet) {
-          this.wallet.balance = res.balance || 0;
-          this.wallet.escrow_balance = res.escrow_balance || 0;
-        }
-        this.showAddFunds = false;
-        this.addAmount = null;
+  openModal(): void {
+    this.form.reset();
+    this.modalOpen.set(true);
+  }
+
+  closeModal(): void {
+    this.modalOpen.set(false);
+  }
+
+  addFunds(): void {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    const raw = this.form.controls.amount.value;
+    const amount = parseFloat(raw);
+    if (!(amount > 0)) return;
+    this.submitting.set(true);
+    this.wallet.addFunds(amount).subscribe({
+      next: () => {
+        this.toast.success('Funds added successfully!');
+        this.submitting.set(false);
+        this.closeModal();
+        this.refresh();
       },
-      error: (error) => {
-        console.error('Error adding funds:', error);
-      }
+      error: () => this.submitting.set(false)
     });
   }
 }

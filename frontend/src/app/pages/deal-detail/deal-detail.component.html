@@ -1,113 +1,133 @@
-<div class="deal-detail-container">
-  <div class="deal-header">
-    <button (click)="goBack()" class="back-button">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M15 18l-6-6 6-6"/>
-      </svg>
-      Back to Dashboard
-    </button>
-    <div class="deal-title-section" *ngIf="deal$ | async as deal">
-      <h1 class="deal-title">{{ deal.title }}</h1>
-      <div class="deal-price">${{ deal.price }}</div>
+<div class="page" *ngIf="!loading(); else skel">
+  <ng-container *ngIf="deal() as d">
+    <div class="toolbar-row">
+      <button type="button" class="link-btn" (click)="manualRefresh()">Refresh</button>
     </div>
-  </div>
-
-  <div class="deal-content" *ngIf="deal$ | async as deal">
-    <div class="deal-main">
-      <div class="deal-info">
-        <div class="deal-description">
-          <h2>Description</h2>
-          <p>{{ deal.description }}</p>
-        </div>
-
-        <div class="deal-participants">
-          <div class="participant">
-            <h3>Seller</h3>
-            <div class="participant-info">
-              <span class="username">{{ deal.seller.username }}</span>
-              <span class="rating">⭐ {{ deal.seller.trust_score }}/5.0</span>
-            </div>
-          </div>
-          <div class="participant">
-            <h3>Buyer</h3>
-            <div class="participant-info">
-              <span class="username">{{ deal.buyer.username }}</span>
-              <span class="rating">⭐ {{ deal.buyer.trust_score }}/5.0</span>
-            </div>
-          </div>
-        </div>
+    <div class="header">
+      <div>
+        <h1 class="title">{{ d.title || d.product_name }}</h1>
+        <p class="meta">
+          <span [attr.title]="formatDate(d.created_at)">Created {{ d.created_at | relativeTime }}</span>
+          <span class="id-row">
+            Deal #{{ d.id }}
+            <button type="button" class="icon-copy" (click)="copyDealId()" title="Copy deal ID" aria-label="Copy deal ID">
+              ⧉
+            </button>
+            <span class="copy-hint" *ngIf="copyHint">{{ copyHint }}</span>
+          </span>
+        </p>
       </div>
+      <app-status-badge [status]="statusForBadge(d)" />
+    </div>
 
-      <div class="deal-sidebar">
-        <div class="deal-progress">
-          <h2>Deal Progress</h2>
-          <div class="progress-steps">
-            <div class="step" *ngFor="let step of getStatusSteps(deal)">
-              <div class="step-icon" [class.completed]="step.completed">
-                <svg *ngIf="step.completed" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                  <polyline points="20 6 9 17 4 12"/>
-                </svg>
-                <div *ngIf="!step.completed" class="step-circle"></div>
-              </div>
-              <div class="step-label">{{ step.label }}</div>
-            </div>
-          </div>
-        </div>
+    <p class="desc">{{ d.description || d.product_description }}</p>
+    <p class="price">${{ priceLabel(d) | number : '1.2-2' }}</p>
 
-        <div class="deal-actions">
-          <button *ngIf="isPayVisible(deal)"
-                  (click)="pay(deal)"
-                  class="action-button pay-button">
-            Pay
-          </button>
-
-          <button *ngIf="isCancelVisible(deal)"
-                  (click)="cancelDeal(deal)"
-                  class="action-button cancel-button">
-            Cancel Deal
-          </button>
-
-          <button *ngIf="isConfirmDeliveryVisible(deal)"
-                  (click)="confirmDelivery(deal)"
-                  [disabled]="!!deal.buyer_confirmed && !deal.seller_confirmed"
-                  class="action-button confirm-button">
-            {{ getConfirmDeliveryLabel(deal) }}
-          </button>
-
-          <button *ngIf="isSellerConfirmVisible(deal)"
-                  (click)="sellerConfirm(deal)"
-                  [disabled]="!!deal.seller_confirmed && !deal.buyer_confirmed"
-                  class="action-button confirm-button">
-            {{ getSellerConfirmLabel(deal) }}
-          </button>
-
-          <button *ngIf="isOpenDisputeVisible(deal)"
-                  (click)="openDispute(deal)"
-                  [disabled]="getDealStatus(deal) === 'DISPUTED'"
-                  class="action-button dispute-button">
-            {{ getOpenDisputeLabel(deal) }}
-          </button>
-        </div>
+    <div class="people">
+      <div class="person">
+        <h3>Seller</h3>
+        <p class="uname">{{ d.seller.username }}</p>
+        <p class="trust">Trust score: {{ d.seller.trust_score | number : '1.1-1' }}</p>
+      </div>
+      <div class="person">
+        <h3>Buyer</h3>
+        <p class="uname">{{ d.buyer.username }}</p>
+        <p class="trust">Trust score: {{ d.buyer.trust_score | number : '1.1-1' }}</p>
       </div>
     </div>
 
-    <div class="deal-important">
-      <div class="important-header">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="8" x2="12" y2="12"/>
-          <line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-        <h3>Important</h3>
+    <section class="timeline card" *ngIf="timelineIdx() >= 0 && status() !== 'DI'">
+      <h2 class="section-title">Progress</h2>
+      <div class="track">
+        <div class="track-fill" [style.width]="progressPercent()"></div>
+        <div class="nodes">
+          <div *ngFor="let s of steps; let i = index" class="node" [class.on]="stepDone(i)">
+            <span class="dot">{{ i + 1 }}</span>
+            <span class="lab">{{ s.label }}</span>
+          </div>
+        </div>
       </div>
-      <p>Please ensure you have received the item before confirming delivery. Once confirmed, funds will be released to the seller.</p>
-    </div>
-  </div>
+    </section>
 
-  <!-- Rating Dialog -->
-  <app-rating-dialog 
-    *ngIf="showRatingDialog && ratingDialogData"
-    [data]="ratingDialogData"
-    (dialogClose)="closeRatingDialog()"
-  ></app-rating-dialog>
+    <section class="timeline card branch" *ngIf="status() === 'DI'">
+      <h2 class="section-title">Deal status</h2>
+      <p class="branch-note">This deal is on a <strong>disputed</strong> branch — normal release steps are paused.</p>
+    </section>
+
+    <div class="banner warn" *ngIf="status() === 'DI'">This deal is in dispute. Funds are frozen pending resolution.</div>
+    <div class="banner muted" *ngIf="status() === 'CA'">This deal was cancelled.</div>
+
+    <section class="actions card">
+      <h2 class="section-title">Actions</h2>
+      <div class="btn-row" *ngIf="showPay()">
+        <button type="button" class="btn primary" [disabled]="acting()" (click)="openModal('pay')">Pay</button>
+      </div>
+      <div class="btn-row" *ngIf="showCancel()">
+        <button type="button" class="btn ghost" [disabled]="acting()" (click)="openModal('cancel')">Cancel</button>
+      </div>
+      <div class="btn-row" *ngIf="showConfirmDelivery()">
+        <button type="button" class="btn primary" [disabled]="acting()" (click)="confirmDelivery()">Confirm Delivery</button>
+      </div>
+      <div class="btn-row" *ngIf="showSellerConfirm()">
+        <button type="button" class="btn primary" [disabled]="acting()" (click)="sellerConfirm()">Seller Confirm</button>
+      </div>
+      <div class="btn-row" *ngIf="showDispute()">
+        <button type="button" class="btn danger" [disabled]="acting()" (click)="openModal('dispute')">Open Dispute</button>
+      </div>
+      <div class="btn-row" *ngIf="showRateEntry()">
+        <button type="button" class="btn accent" [disabled]="acting()" (click)="openRatingFromButton()">Rate Seller</button>
+      </div>
+    </section>
+  </ng-container>
 </div>
+
+<ng-template #skel>
+  <div class="page">
+    <app-skeleton-loader [height]="36" />
+    <app-skeleton-loader [height]="20" class="mt-4" />
+    <app-skeleton-loader [height]="120" class="mt-6" />
+  </div>
+</ng-template>
+
+<app-confirmation-modal
+  [open]="modal() === 'pay'"
+  title="Confirm payment"
+  message="Are you sure you want to pay from your wallet into escrow for this deal?"
+  [detail]="payModalDetail()"
+  confirmLabel="Pay now"
+  cancelLabel="Back"
+  (confirm)="confirmPay()"
+  (cancel)="closeModal()"
+/>
+
+<app-confirmation-modal
+  [open]="modal() === 'cancel'"
+  title="Cancel deal"
+  message="Are you sure you want to cancel this deal? This can only be done while the deal is still in Created status."
+  [detail]="cancelModalDetail()"
+  confirmLabel="Cancel deal"
+  cancelLabel="Back"
+  variant="danger"
+  (confirm)="confirmCancel()"
+  (cancel)="closeModal()"
+/>
+
+<app-confirmation-modal
+  [open]="modal() === 'dispute'"
+  title="Open dispute"
+  message="Are you sure you want to open a dispute? Funds will remain frozen until the dispute is resolved."
+  [detail]="disputeModalDetail()"
+  confirmLabel="Open dispute"
+  cancelLabel="Back"
+  variant="danger"
+  (confirm)="confirmDispute()"
+  (cancel)="closeModal()"
+/>
+
+<app-rating-prompt-modal
+  [open]="ratingModalOpen()"
+  [sellerUsername]="deal()?.seller?.username || ''"
+  [dealId]="deal()?.id ?? null"
+  (skipped)="skipRatingModal()"
+  (submitted)="submitRatingModal($event)"
+/>

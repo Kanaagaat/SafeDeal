@@ -1,75 +1,92 @@
-<div class="page-container">
-  <div class="dashboard-header">
+<div class="page">
+  <div class="head">
     <div>
-      <h1 class="page-title">My Deals</h1>
-      <p class="page-subtitle">Manage your active and completed transactions</p>
+      <h1 class="title">Dashboard</h1>
+      <p class="sub">Your deals at a glance</p>
     </div>
-    <a routerLink="/create-deal" class="btn-primary">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-        <circle cx="12" cy="12" r="10"/>
-        <line x1="12" y1="8" x2="12" y2="16"/>
-        <line x1="8" y1="12" x2="16" y2="12"/>
-      </svg>
-      Create Deal
+    <a routerLink="/deals/create" class="cta">Create Deal</a>
+  </div>
+
+  <div class="banner-rate" *ngIf="pendingRatingDeals().length">
+    <div>
+      <strong>Rate your experience</strong>
+      <p>You have {{ pendingRatingDeals().length }} completed deal(s) where you can rate the seller.</p>
+    </div>
+    <button type="button" class="cta secondary" (click)="openRatingModal(pendingRatingDeals()[0])">
+      Rate now
+    </button>
+  </div>
+
+  <div class="toolbar">
+    <input
+      type="search"
+      class="search"
+      placeholder="Search by title, username, or deal #…"
+      (input)="setSearch($event)"
+      aria-label="Search deals"
+    />
+  </div>
+
+  <div class="chips">
+    <button type="button" [class.on]="filter() === 'all'" (click)="setFilter('all')">All</button>
+    <button type="button" [class.on]="filter() === 'active'" (click)="setFilter('active')">Active</button>
+    <button type="button" [class.on]="filter() === 'completed'" (click)="setFilter('completed')">Completed</button>
+    <button type="button" [class.on]="filter() === 'cancelled'" (click)="setFilter('cancelled')">Cancelled</button>
+    <button type="button" [class.on]="filter() === 'disputed'" (click)="setFilter('disputed')">Disputed</button>
+  </div>
+
+  <div class="grid" *ngIf="!loading() && filteredDeals().length">
+    <a *ngFor="let d of filteredDeals()" [routerLink]="['/deals', d.id]" class="card">
+      <div class="card-top">
+        <h2 class="card-title">{{ d.title || d.product_name }}</h2>
+        <app-status-badge [status]="statusOf(d)" />
+      </div>
+      <p class="meta">
+        <span>Seller: {{ d.seller.username }}</span>
+        <span>Buyer: {{ d.buyer.username }}</span>
+      </p>
+      <p class="price">${{ dealPrice(d) | number : '1.2-2' }}</p>
+      <span
+        class="rate-pill"
+        *ngIf="d.buyer_has_rated === false && statusOf(d) === 'RE' && d.buyer.username === auth.getCurrentUser()?.username"
+      >
+        Awaiting your rating
+      </span>
     </a>
   </div>
 
-  <!-- Loading -->
-  <div *ngIf="loading" class="loading-state">
-    <div class="skeleton" *ngFor="let i of [1,2,3,4]"></div>
+  <div class="empty" *ngIf="!loading() && !deals().length">
+    <div class="empty-illus" aria-hidden="true">
+      <svg viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="20" width="100" height="60" rx="8" stroke="#334155" stroke-width="2" />
+        <path d="M35 45h50M35 58h30" stroke="#475569" stroke-width="3" stroke-linecap="round" />
+        <circle cx="88" cy="38" r="10" fill="#1a56db" opacity="0.35" />
+      </svg>
+    </div>
+    <h2>No deals yet</h2>
+    <p>Start by creating your first escrow-backed deal.</p>
+    <a routerLink="/deals/create" class="cta">Create your first deal</a>
   </div>
 
-  <!-- Empty state -->
-  <div *ngIf="!loading && deals.length === 0" class="empty-state">
-    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" stroke-width="1.5">
-      <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-    </svg>
-    <p>No deals yet. <a routerLink="/create-deal">Create your first deal</a></p>
+  <div class="empty soft" *ngIf="!loading() && deals().length && !filteredDeals().length">
+    <p>No deals match your filters or search.</p>
+    <button type="button" class="linkish" (click)="clearFilters()">Clear filters</button>
   </div>
 
-  <!-- Deals list -->
-  <div class="deals-list" *ngIf="!loading && deals.length > 0">
-    <div class="deal-card card" *ngFor="let deal of deals" [routerLink]="['/deal', deal.id]">
-      <div class="deal-card__left">
-        <h3 class="deal-card__title">{{ deal.title }}</h3>
-        <div class="deal-card__parties">
-          <span class="party">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
-            </svg>
-            Buyer: {{ deal.buyer.username }}
-          </span>
-          <span class="party">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
-            </svg>
-            Seller: {{ deal.seller.username }}
-          </span>
-        </div>
-        <p class="deal-card__role">You are the {{ deal.role }}</p>
-      </div>
-      <div class="deal-card__right">
-        <span class="deal-card__price">${{ deal.price | number }}</span>
-        <span [class]="'badge badge-' + getStatusClass(deal.status)">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <ng-container [ngSwitch]="deal.status">
-              <ng-container *ngSwitchCase="'SE'">
-                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-              </ng-container>
-              <ng-container *ngSwitchCase="'SH'">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </ng-container>
-              <ng-container *ngSwitchCase="'PA'">
-                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-              </ng-container>
-              <ng-container *ngSwitchDefault>
-                <polyline points="20 6 9 17 4 12"/>
-              </ng-container>
-            </ng-container>
-          </svg>
-          {{ getStatusLabel(deal.status) }}
-        </span>
-      </div>
+  <div class="grid skeletons" *ngIf="loading()">
+    <div class="card sk" *ngFor="let _ of [1, 2, 3, 4, 5, 6]">
+      <app-skeleton-loader [height]="22" />
+      <app-skeleton-loader [height]="14" class="mt-3" />
+      <app-skeleton-loader [height]="14" class="mt-2" />
+      <app-skeleton-loader [height]="28" class="mt-4" />
     </div>
   </div>
 </div>
+
+<app-rating-prompt-modal
+  [open]="!!ratingDeal()"
+  [sellerUsername]="ratingDeal()?.seller?.username || ''"
+  [dealId]="ratingDeal()?.id ?? null"
+  (skipped)="skipRating()"
+  (submitted)="submitDashboardRating($event)"
+/>

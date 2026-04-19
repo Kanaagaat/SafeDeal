@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
-export type ToastType = 'success' | 'error' | 'info' | 'warning';
+export type ToastType = 'success' | 'error' | 'info';
 
 export interface ToastMessage {
   id: number;
@@ -12,10 +12,21 @@ export interface ToastMessage {
 @Injectable({ providedIn: 'root' })
 export class ToastService {
   private messagesSubject = new BehaviorSubject<ToastMessage[]>([]);
-  public messages$ = this.messagesSubject.asObservable();
+  readonly messages$ = this.messagesSubject.asObservable();
   private nextId = 1;
+  private readonly defaultDuration = 4000;
+  private lastToastKey = '';
+  private lastToastAt = 0;
 
-  show(message: string, type: ToastType = 'info', duration = 3000): void {
+  show(message: string, type: ToastType = 'info', duration = this.defaultDuration): void {
+    const key = `${type}:${message}`;
+    const now = Date.now();
+    if (key === this.lastToastKey && now - this.lastToastAt < 2000) {
+      return;
+    }
+    this.lastToastKey = key;
+    this.lastToastAt = now;
+
     const toast: ToastMessage = {
       id: this.nextId++,
       type,
@@ -23,28 +34,23 @@ export class ToastService {
     };
     const current = this.messagesSubject.value;
     this.messagesSubject.next([...current, toast]);
-
     setTimeout(() => this.dismiss(toast.id), duration);
   }
 
-  success(message: string, duration = 3000): void {
+  success(message: string, duration = this.defaultDuration): void {
     this.show(message, 'success', duration);
   }
 
-  error(message: string, duration = 4000): void {
+  error(message: string, duration = this.defaultDuration): void {
     this.show(message, 'error', duration);
   }
 
-  info(message: string, duration = 3000): void {
+  info(message: string, duration = this.defaultDuration): void {
     this.show(message, 'info', duration);
-  }
-
-  warning(message: string, duration = 3000): void {
-    this.show(message, 'warning', duration);
   }
 
   dismiss(id: number): void {
     const current = this.messagesSubject.value;
-    this.messagesSubject.next(current.filter(toast => toast.id !== id));
+    this.messagesSubject.next(current.filter((t) => t.id !== id));
   }
 }

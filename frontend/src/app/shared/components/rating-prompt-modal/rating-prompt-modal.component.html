@@ -1,0 +1,38 @@
+<div class="backdrop" *ngIf="open" (click)="skip()" role="dialog" aria-modal="true">
+  <div class="panel" (click)="$event.stopPropagation()">
+    <h2>Deal complete!</h2>
+    <p class="lead">
+      Would you like to rate your experience with <strong>{{ sellerUsername }}</strong>?
+    </p>
+
+    <form [formGroup]="form" (ngSubmit)="$event.preventDefault()">
+      <div class="stars-row" (mouseleave)="clearHover()">
+        <button
+          type="button"
+          *ngFor="let n of [1, 2, 3, 4, 5]"
+          class="star-btn"
+          [class.on]="n <= displayScore()"
+          (click)="setScore(n)"
+          (mouseenter)="setHover(n)"
+          [attr.aria-label]="'Rate ' + n + ' stars'"
+        >
+          ★
+        </button>
+      </div>
+      <p class="score-label">{{ displayScore() }} / 5</p>
+
+      <label class="lbl">Comment (optional)</label>
+      <textarea
+        class="ta"
+        rows="3"
+        formControlName="comment"
+        placeholder="Leave a comment (optional)"
+      ></textarea>
+
+      <div class="actions">
+        <button type="button" class="ghost" (click)="skip()">Skip</button>
+        <button type="button" class="primary" (click)="submit()">Submit Rating</button>
+      </div>
+    </form>
+  </div>
+</div>

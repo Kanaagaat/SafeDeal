@@ -1,136 +1,96 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
 
-:root {
-  --primary: #2563EB;
-  --primary-hover: #1D4ED8;
-  --primary-light: #EFF6FF;
-  --bg: #F3F4F6;
-  --surface: #FFFFFF;
-  --border: #E5E7EB;
-  --text-primary: #111827;
-  --text-secondary: #6B7280;
-  --text-muted: #9CA3AF;
-  --success: #10B981;
-  --success-light: #ECFDF5;
-  --warning: #F59E0B;
-  --warning-light: #FFFBEB;
-  --purple: #8B5CF6;
-  --purple-light: #F5F3FF;
-  --radius: 12px;
-  --radius-sm: 8px;
-  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.04);
+/* Подключаем Toastr через CDN для надежности */
+@import 'https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css';
+
+/* Настройка темы SafeDeal для SafeDeal */
+@theme {
+  --color-trust-blue: #1E3A8A;
+  --color-trust-blue-dark: #172554;
+  --color-alert-red: #E11D48;
+  --color-alert-red-dark: #BE123C;
+  --color-safe-green: #059669;
+  --color-safe-green-dark: #047857;
+  --color-background: #F8FAFC;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/* Стили компонентов */
+.btn-primary {
+  @apply bg-trust-blue text-white font-medium py-3 px-6 rounded-lg shadow-md transition-colors duration-200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-primary:hover {
+  @apply bg-trust-blue-dark;
+}
+
+.btn-primary:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+.btn-danger {
+  @apply bg-alert-red text-white font-medium py-3 px-6 rounded-lg shadow-md transition-colors duration-200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-danger:hover {
+  @apply bg-alert-red-dark;
+}
+
+.btn-danger:disabled {
+  @apply opacity-50;
+}
+
+.input-field {
+  @apply w-full px-4 py-3 rounded-lg border border-gray-300 transition-all;
+}
+
+.input-field:focus {
+  @apply outline-none ring-2 ring-trust-blue border-transparent;
+}
+
+html {
+  min-height: 100%;
+  background-color: #F8FAFC;
 }
 
 body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--bg);
-  color: var(--text-primary);
-  font-size: 15px;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
+  @apply bg-background text-gray-900 antialiased;
+  background-color: #F8FAFC;
+  min-height: 100%;
+  font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
 
-.page-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 1rem;
-  min-height: 100vh;
+/* Global Loading Bar */
+#global-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background-color: transparent;
+  z-index: 9999;
+  overflow: hidden;
 }
 
-@media (min-width: 768px) {
-  .page-container {
-    padding: 3rem;
-  }
+#global-loader::before {
+  content: '';
+  display: block;
+  position: absolute;
+  left: -200px;
+  width: 200px;
+  height: 4px;
+  background-color: #1E3A8A;
+  animation: loading 2s linear infinite;
 }
 
-a {
-  text-decoration: none;
-  color: inherit;
-}
-
-button {
-  font-family: 'DM Sans', sans-serif;
-  cursor: pointer;
-  border: none;
-  outline: none;
-  min-height: 44px;
-  padding: 12px 24px;
-  border-radius: var(--radius);
-  font-size: 16px;
-  font-weight: 600;
-  transition: all 0.2s;
-}
-
-img {
-  max-width: 100%;
-  height: auto;
-}
-
-input, textarea {
-  font-family: 'DM Sans', sans-serif;
-  outline: none;
-}
-
-.btn-primary {
-  background: var(--primary);
-  color: #fff;
-  border-radius: var(--radius-sm);
-  padding: 12px 24px;
-  font-size: 15px;
-  font-weight: 600;
-  transition: background 0.2s;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-
-  &:hover { background: var(--primary-hover); }
-}
-
-.btn-secondary {
-  background: #F3F4F6;
-  color: var(--text-primary);
-  border-radius: var(--radius-sm);
-  padding: 12px 24px;
-  font-size: 15px;
-  font-weight: 500;
-  transition: background 0.2s;
-
-  &:hover { background: #E5E7EB; }
-}
-
-.card {
-  background: var(--surface);
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow);
-}
-
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 12px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 500;
-
-  &.badge-secured  { background: #EFF6FF; color: var(--primary); }
-  &.badge-shipped  { background: var(--purple-light); color: var(--purple); }
-  &.badge-pending  { background: var(--warning-light); color: var(--warning); }
-  &.badge-completed { background: var(--success-light); color: var(--success); }
-  &.badge-progress { background: #EFF6FF; color: var(--primary); }
-}
-
-.page-container {
-  min-height: calc(100vh - 64px);
-  padding: 36px 40px;
-  max-width: 1280px;
-  margin: 0 auto;
+@keyframes loading {
+  0% { left: -200px; width: 30%; }
+  50% { width: 30%; }
+  70% { width: 70%; }
+  100% { left: 100%; }
 }
