@@ -1,5 +1,4 @@
 
----
 # 🛡️ SafeDeal — Secure Escrow Web Platform
 
 ## 📌 Project Description
@@ -26,8 +25,7 @@ This helps prevent common online scams where:
 * **Lecture Time:** Monday 15:00–17:00
 * **Practice Time:** Monday 17:00–19:00
 
-
-
+---
 
 ## 🚀 Key Features
 
@@ -43,11 +41,12 @@ This helps prevent common online scams where:
 
 ## 🔄 How It Works
 
-1.  **Deal Creation:** Seller creates a deal (listing product, price, and buyer).
-2.  **Confirmation:** Buyer confirms participation in the deal.
-3.  **Escrow Deposit:** Buyer sends the payment to the secure escrow wallet.
-4.  **Shipping:** Seller ships the product to the buyer.
-5.  **Release:** Buyer confirms delivery; the system releases funds to the seller.
+1. **Deal Creation:** Seller creates a deal (listing product, price, and buyer).
+2. **Payment:** Buyer pays the amount, funds move to escrow, status becomes SHIPPED.
+3. **Shipping:** Seller ships the product to the buyer.
+4. **Delivery Confirmation:** Buyer confirms delivery, status becomes DELIVERED.
+5. **Seller Confirmation:** Seller confirms, funds are released to seller, status becomes RELEASED.
+6. **Rating:** Buyer can rate the seller after completion.
 
 > [!IMPORTANT]
 > If a dispute arises at any stage, the funds remain locked in escrow until a resolution is reached.
@@ -132,15 +131,19 @@ The frontend will be available at: `http://localhost:4200`
 | `GET` | `/api/deals/` | List all deals (as Buyer or Seller) |
 | `POST` | `/api/deals/` | Initiate a new deal as a Seller |
 | `GET` | `/api/deals/{id}/` | Get full deal details & status |
-| `POST` | `/api/deals/{id}/cancel-deal/` | Cancel a deal (Only if status is `CREATED`) |
+| `PUT` | `/api/deals/{id}/` | Update deal status |
+| `DELETE` | `/api/deals/{id}/` | Delete a deal (if not completed or cancelled) |
+| `POST` | `/api/deals/{id}/confirm-delivery/` | Buyer confirms delivery |
+| `POST` | `/api/deals/{id}/seller-confirm/` | Seller confirms deal |
 | `POST` | `/api/deals/{id}/open-dispute/` | Raise a dispute for an active deal |
+| `POST` | `/api/deals/{id}/cancel-deal/` | Cancel a deal (Only if status is `CREATED`) |
 
 ### 💸 Transactions (Escrow Flow)
 | Method | Endpoint | Description |
 |:--- |:--- |:--- |
 | `GET` | `/api/transactions/` | View full history of all financial movements |
 | `POST` | `/api/transactions/pay/` | **Buyer:** Move funds from balance to Escrow |
-| `POST` | `/api/transactions/confirm/` | **Buyer:** Release Escrow funds to the Seller |
+| `POST` | `/api/transactions/confirm/` | **Buyer:** Confirm deal completion and release funds |
 
 ### ⭐️ Ratings & Reputation
 | Method | Endpoint | Description |
@@ -153,16 +156,17 @@ The frontend will be available at: `http://localhost:4200`
 ## 🛠 Technical Implementation Details
 
 ### **Financial Security**
-- **Escrow Logic:** When a buyer "Pays," funds are locked in the `escrow_balance`. Neither the buyer nor the seller can withdraw these funds until the deal is `COMPLETED` or `CANCELLED`.
+- **Escrow Logic:** When a buyer "Pays," funds are locked in the `escrow_balance`. Neither the buyer nor the seller can withdraw these funds until the deal is `RELEASED` or `CANCELLED`.
 - **Atomic Transactions:** All balance updates are wrapped in `transaction.atomic()` to prevent data corruption during server errors.
 - **Precision:** Uses `DecimalField` for all currency values to prevent floating-point rounding errors.
 
 ### **Deal Lifecycle**
 1. **CREATED:** Deal is listed but not yet funded.
 2. **SHIPPED:** Buyer has funded the escrow; seller is expected to deliver.
-3. **DELIVERED:** Product received; waiting for final buyer confirmation.
-4. **COMPLETED:** Funds released to Seller; deal archived.
-5. **DISPUTED:** Admin intervention required.
+3. **DELIVERED:** Buyer has confirmed delivery; waiting for seller confirmation.
+4. **RELEASED:** Both parties confirmed; funds released to Seller; deal archived.
+5. **CANCELLED:** Deal cancelled before payment.
+6. **DISPUTED:** Admin intervention required.
 
 ### **Authentication**
 All protected endpoints require the following header:
@@ -170,16 +174,12 @@ All protected endpoints require the following header:
 
 ---
 
-
-
-
 ## 📊 Database Models
 
 * **User:** Profiles, balances, and trust ratings.
 * **Deal:** Core deal data (Buyer, Seller, Price, Status).
 * **Transaction:** Ledger of all fund movements.
 * **Rating:** Feedback left by users after completion.
-* **(Optional) Dispute:** Log for contested transactions.
 
 ---
 
@@ -187,7 +187,7 @@ All protected endpoints require the following header:
 
 * Build a full-stack web application using **Angular** and **Django**.
 * Implement a secure **RESTful API** with token authentication.
-* Design a robust relational database using **PostgreSQL**.
+* Design a robust relational database using **SQLite**.
 * Solve a real-world problem regarding online transaction safety at **KBTU**.
 
 ---
