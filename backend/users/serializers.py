@@ -62,8 +62,28 @@ class UserSerializer(serializers.ModelSerializer):
     """Сериализатор для пользователя (только чтение)"""
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'balance', 'escrow_balance', 'trust_score', 'date_joined')
-        read_only_fields = ('id', 'balance', 'escrow_balance', 'trust_score', 'date_joined')
+        fields = (
+            'id',
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'balance',
+            'escrow_balance',
+            'trust_score',
+            'date_joined',
+        )
+        read_only_fields = (
+            'id',
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'balance',
+            'escrow_balance',
+            'trust_score',
+            'date_joined',
+        )
 
 
 

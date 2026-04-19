@@ -72,4 +72,10 @@ class Deal(models.Model):
     class Meta:
         verbose_name = 'Deal'
         verbose_name_plural = 'Deals'
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(product_price__gt=0),
+                name='deal_product_price_positive',
+            ),
+        ]
 

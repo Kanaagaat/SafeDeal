@@ -57,6 +57,7 @@ def login(request):
 
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def logout(request):
     try:
         refresh_token = request.data.get('refresh')
@@ -92,14 +93,16 @@ def get_balance(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def add_funds(request):
+    amount_raw = request.data.get('amount')
+    if amount_raw is None or amount_raw == '':
+        return Response({'error': 'Amount is required'}, status=status.HTTP_400_BAD_REQUEST)
     try:
-        amount_raw = request.data.get('amount', 0)
         amount = Decimal(str(amount_raw))
     except (TypeError, ValueError, Decimal.InvalidOperation):
-        return Response({'error': 'Invalid amount format'}, status=400)
-    
+        return Response({'error': 'Invalid amount format'}, status=status.HTTP_400_BAD_REQUEST)
+
     if amount <= 0:
-        return Response({'error': 'Amount must be greater than 0'}, status=400)
+        return Response({'error': 'Amount must be greater than 0'}, status=status.HTTP_400_BAD_REQUEST)
     
     amount_decimal = Decimal(str(amount))
     
