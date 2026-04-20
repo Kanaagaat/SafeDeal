@@ -111,3 +111,16 @@ class DealCreateSerializer(serializers.ModelSerializer):
         if len(name.strip()) < 3:
             raise serializers.ValidationError('Product name must be longer than 3 letters.')
         return name
+    
+    def validate(self, attrs):
+        request = self.context.get('request')
+
+        user = getattr(request, 'user', None)
+
+        buyer = attrs.get('buyer')
+
+
+        if user == buyer:
+            raise serializers.ValidationError({"buyer": "You cannot create a deal with yourself."})
+        
+        return attrs

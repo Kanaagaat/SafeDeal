@@ -26,7 +26,7 @@ class DealListView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
-        serializer = DealCreateSerializer(data=request.data)
+        serializer = DealCreateSerializer(data=request.data, context = {'request': request})
         if serializer.is_valid():
             deal = serializer.save(seller=request.user)
             response_serializer = DealSerializer(deal, context={'request': request})
