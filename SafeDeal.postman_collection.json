@@ -1,0 +1,794 @@
+{
+	"info": {
+		"_postman_id": "safedeal-collection-v1",
+		"name": "SafeDeal API",
+		"description": "Complete API collection for SafeDeal — Secure Escrow Platform. Built with Django + DRF.\n\n**Setup:**\n1. Set the `base_url` variable to `http://localhost:8000`\n2. Run Register or Login — the `access_token` and `refresh_token` variables are set automatically via test scripts\n3. All protected endpoints use `{{access_token}}` via the collection-level Authorization header",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refresh_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "deal_id",
+			"value": "1",
+			"type": "string"
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const json = pm.response.json();",
+									"    if (json.access) pm.collectionVariables.set('access_token', json.access);",
+									"    if (json.refresh) pm.collectionVariables.set('refresh_token', json.refresh);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser1\",\n    \"email\": \"testuser1@example.com\",\n    \"password\": \"password123\",\n    \"first_name\": \"Test\",\n    \"last_name\": \"User\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/register/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "register", ""]
+						},
+						"description": "Create a new user account. Returns JWT access and refresh tokens."
+					},
+					"response": [
+						{
+							"name": "201 Created — success",
+							"originalRequest": {
+								"method": "POST",
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"username\": \"testuser1\",\n    \"email\": \"testuser1@example.com\",\n    \"password\": \"password123\",\n    \"first_name\": \"Test\",\n    \"last_name\": \"User\"\n}"
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"user\": {\n        \"id\": 1,\n        \"username\": \"testuser1\",\n        \"email\": \"testuser1@example.com\",\n        \"balance\": \"0.00\",\n        \"escrow_balance\": \"0.00\",\n        \"trust_score\": \"5.0\"\n    },\n    \"refresh\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n    \"access\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"\n}"
+						},
+						{
+							"name": "400 Bad Request — username taken",
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"username\": [\"Username already exist\"],\n    \"email\": [\"Email already exists\"]\n}"
+						}
+					]
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const json = pm.response.json();",
+									"    if (json.access) pm.collectionVariables.set('access_token', json.access);",
+									"    if (json.refresh) pm.collectionVariables.set('refresh_token', json.refresh);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser1\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/login/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "login", ""]
+						},
+						"description": "Authenticate with username and password. Returns JWT access and refresh tokens."
+					},
+					"response": [
+						{
+							"name": "200 OK — success",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"user\": {\n        \"id\": 1,\n        \"username\": \"testuser1\",\n        \"email\": \"testuser1@example.com\",\n        \"balance\": 150.00,\n        \"escrow_balance\": 0.00,\n        \"trust_score\": 4.5\n    },\n    \"refresh\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n    \"access\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"\n}"
+						},
+						{
+							"name": "400 Bad Request — wrong credentials",
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"non_field_errors\": [\"Invalid username or password\"]\n}"
+						}
+					]
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh\": \"{{refresh_token}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/logout/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "logout", ""]
+						},
+						"description": "Blacklists the refresh token, ending the session."
+					},
+					"response": [
+						{
+							"name": "200 OK — logged out",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"message\": \"Successfully logged out\"\n}"
+						},
+						{
+							"name": "400 Bad Request — no refresh token",
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"error\": \"Refresh token required\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const json = pm.response.json();",
+									"    if (json.access) pm.collectionVariables.set('access_token', json.access);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh\": \"{{refresh_token}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/token/refresh/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "token", "refresh", ""]
+						},
+						"description": "Use the refresh token to get a new access token."
+					},
+					"response": [
+						{
+							"name": "200 OK — new access token",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"access\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "User & Wallet",
+			"item": [
+				{
+					"name": "Get Profile",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/user/profile/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "user", "profile", ""]
+						},
+						"description": "Returns the authenticated user's profile including trust score."
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"id\": 1,\n    \"username\": \"testuser1\",\n    \"email\": \"testuser1@example.com\",\n    \"first_name\": \"Test\",\n    \"last_name\": \"User\",\n    \"balance\": \"150.00\",\n    \"escrow_balance\": \"50.00\",\n    \"trust_score\": \"4.5\",\n    \"date_joined\": \"2025-01-10T12:00:00Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Balance",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/user/balance/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "user", "balance", ""]
+						},
+						"description": "Returns current balance, escrow_balance, and trust_score."
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"balance\": 150.0,\n    \"escrow_balance\": 50.0,\n    \"trust_score\": 4.5\n}"
+						}
+					]
+				},
+				{
+					"name": "Add Funds",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"amount\": 100.00\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/user/add-funds/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "user", "add-funds", ""]
+						},
+						"description": "Deposits money into the user's balance. Creates a DEPOSIT transaction record."
+					},
+					"response": [
+						{
+							"name": "200 OK — funds added",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"balance\": 250.0,\n    \"escrow_balance\": 0.0\n}"
+						},
+						{
+							"name": "400 Bad Request — invalid amount",
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"error\": \"Amount must be greater than 0\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Deals",
+			"item": [
+				{
+					"name": "List Deals",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/deals/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "deals", ""]
+						},
+						"description": "Returns all deals where the authenticated user is buyer or seller."
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "[\n    {\n        \"id\": 1,\n        \"product_name\": \"Laptop Dell XPS 15\",\n        \"product_description\": \"Brand new, sealed box, 32GB RAM\",\n        \"product_price\": \"1200.00\",\n        \"deal_status\": \"CR\",\n        \"buyer\": {\n            \"id\": 2,\n            \"username\": \"buyer_user\",\n            \"trust_score\": \"5.0\"\n        },\n        \"seller\": {\n            \"id\": 1,\n            \"username\": \"testuser1\",\n            \"trust_score\": \"4.5\"\n        },\n        \"buyer_has_rated\": null,\n        \"title\": \"Laptop Dell XPS 15\",\n        \"description\": \"Brand new, sealed box, 32GB RAM\",\n        \"price\": \"1200.00\",\n        \"status\": \"CR\",\n        \"created_at\": \"2025-04-20T10:00:00Z\",\n        \"updated_at\": \"2025-04-20T10:00:00Z\"\n    }\n]"
+						}
+					]
+				},
+				{
+					"name": "Create Deal",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const json = pm.response.json();",
+									"    if (json.id) pm.collectionVariables.set('deal_id', json.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"product_name\": \"Laptop Dell XPS 15\",\n    \"product_description\": \"Brand new, sealed box, 32GB RAM, Intel i9\",\n    \"product_price\": \"1200.00\",\n    \"buyer\": \"buyer_user\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/deals/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "deals", ""]
+						},
+						"description": "Seller creates a new deal. The authenticated user becomes the seller. Buyer is identified by username."
+					},
+					"response": [
+						{
+							"name": "201 Created",
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"id\": 1,\n    \"product_name\": \"Laptop Dell XPS 15\",\n    \"product_description\": \"Brand new, sealed box, 32GB RAM, Intel i9\",\n    \"product_price\": \"1200.00\",\n    \"deal_status\": \"CR\",\n    \"buyer\": {\n        \"id\": 2,\n        \"username\": \"buyer_user\",\n        \"trust_score\": \"5.0\"\n    },\n    \"seller\": {\n        \"id\": 1,\n        \"username\": \"testuser1\",\n        \"trust_score\": \"4.5\"\n    },\n    \"buyer_has_rated\": null,\n    \"title\": \"Laptop Dell XPS 15\",\n    \"description\": \"Brand new, sealed box, 32GB RAM, Intel i9\",\n    \"price\": \"1200.00\",\n    \"status\": \"CR\",\n    \"created_at\": \"2025-04-21T09:00:00Z\",\n    \"updated_at\": \"2025-04-21T09:00:00Z\"\n}"
+						},
+						{
+							"name": "400 Bad Request — buyer not found",
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"buyer\": [\"User 'buyer_user' does not exist. Please check the username and try again.\"]\n}"
+						},
+						{
+							"name": "400 Bad Request — deal with yourself",
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"buyer\": [\"You cannot create a deal with yourself.\"]\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Deal by ID",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/deals/{{deal_id}}/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "deals", "{{deal_id}}", ""]
+						},
+						"description": "Retrieve full details of a specific deal. Only accessible by the buyer or seller."
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"id\": 1,\n    \"product_name\": \"Laptop Dell XPS 15\",\n    \"product_description\": \"Brand new, sealed box, 32GB RAM, Intel i9\",\n    \"product_price\": \"1200.00\",\n    \"deal_status\": \"SH\",\n    \"buyer\": {\n        \"id\": 2,\n        \"username\": \"buyer_user\",\n        \"trust_score\": \"5.0\"\n    },\n    \"seller\": {\n        \"id\": 1,\n        \"username\": \"testuser1\",\n        \"trust_score\": \"4.5\"\n    },\n    \"buyer_has_rated\": false,\n    \"title\": \"Laptop Dell XPS 15\",\n    \"description\": \"Brand new, sealed box, 32GB RAM, Intel i9\",\n    \"price\": \"1200.00\",\n    \"status\": \"SH\",\n    \"created_at\": \"2025-04-21T09:00:00Z\",\n    \"updated_at\": \"2025-04-21T10:30:00Z\"\n}"
+						},
+						{
+							"name": "404 Not Found — no access",
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"error\": \"Deal not found or you dont have access\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Update Deal Status",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"SH\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/deals/{{deal_id}}/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "deals", "{{deal_id}}", ""]
+						},
+						"description": "Update the status of a deal. Valid statuses: CR, PA, SE, SH, DE, RE, CA, DI"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"id\": 1,\n    \"deal_status\": \"SH\",\n    \"status\": \"SH\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Delete / Cancel Deal",
+					"request": {
+						"method": "DELETE",
+						"url": {
+							"raw": "{{base_url}}/api/deals/{{deal_id}}/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "deals", "{{deal_id}}", ""]
+						},
+						"description": "Cancels a deal. Only works if deal status is CREATED (CR) and no escrow payment has been made."
+					},
+					"response": [
+						{
+							"name": "200 OK — cancelled",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"message\": \"Deal cancelled successfully\",\n    \"deal\": {\n        \"id\": 1,\n        \"deal_status\": \"CA\"\n    }\n}"
+						},
+						{
+							"name": "400 Bad Request — wrong status",
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"error\": \"You can only delete deals that are still in Created status.\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Confirm Delivery (Buyer)",
+					"request": {
+						"method": "POST",
+						"url": {
+							"raw": "{{base_url}}/api/deals/{{deal_id}}/confirm-delivery/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "deals", "{{deal_id}}", "confirm-delivery", ""]
+						},
+						"description": "Buyer confirms they received the product. Deal moves from SHIPPED to DELIVERED. If seller also confirmed, funds are released."
+					},
+					"response": [
+						{
+							"name": "200 OK — waiting for seller",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"message\": \"Buyer successfully confirmed delivery, waiting for seller confirmation.\",\n    \"deal\": {\n        \"id\": 1,\n        \"deal_status\": \"DE\",\n        \"buyer_confirmed\": true,\n        \"seller_confirmed\": false\n    }\n}"
+						},
+						{
+							"name": "200 OK — deal finalized",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"message\": \"Deal finalized!\",\n    \"deal\": {\n        \"id\": 1,\n        \"deal_status\": \"RE\"\n    }\n}"
+						},
+						{
+							"name": "403 Forbidden — not the buyer",
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"error\": \"Only buyer can confirm delivery\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Seller Confirm",
+					"request": {
+						"method": "POST",
+						"url": {
+							"raw": "{{base_url}}/api/deals/{{deal_id}}/seller-confirm/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "deals", "{{deal_id}}", "seller-confirm", ""]
+						},
+						"description": "Seller confirms their side of the deal. If buyer also confirmed, funds are released from escrow to seller."
+					},
+					"response": [
+						{
+							"name": "200 OK — waiting for buyer",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"message\": \"Seller confirmed. Waiting for buyer confirmation.\",\n    \"deal\": {\n        \"id\": 1,\n        \"deal_status\": \"SH\",\n        \"seller_confirmed\": true\n    }\n}"
+						},
+						{
+							"name": "200 OK — funds released",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"message\": \"Deal finalized and funds released!\",\n    \"deal\": {\n        \"id\": 1,\n        \"deal_status\": \"RE\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Open Dispute",
+					"request": {
+						"method": "POST",
+						"url": {
+							"raw": "{{base_url}}/api/deals/{{deal_id}}/open-dispute/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "deals", "{{deal_id}}", "open-dispute", ""]
+						},
+						"description": "Buyer or seller raises a dispute. Deal status changes to DISPUTED and funds remain frozen in escrow."
+					},
+					"response": [
+						{
+							"name": "200 OK — dispute opened",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"message\": \"Dispute opened. Funds frozen until arbitrator decision.\",\n    \"deal\": {\n        \"id\": 1,\n        \"deal_status\": \"DI\"\n    }\n}"
+						},
+						{
+							"name": "400 Bad Request — invalid status",
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"error\": \"Cannot open dispute in status CR\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Cancel Deal",
+					"request": {
+						"method": "POST",
+						"url": {
+							"raw": "{{base_url}}/api/deals/{{deal_id}}/cancel-deal/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "deals", "{{deal_id}}", "cancel-deal", ""]
+						},
+						"description": "Cancel a deal that is still in CREATED status. Can be called by buyer or seller."
+					},
+					"response": [
+						{
+							"name": "200 OK — cancelled",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"message\": \"You succesfully canceled the deal\",\n    \"deal\": {\n        \"id\": 1,\n        \"deal_status\": \"CA\"\n    }\n}"
+						},
+						{
+							"name": "400 Bad Request — wrong status",
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"error\": \"You can cancel only CREATED status deals\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Transactions (Escrow Flow)",
+			"item": [
+				{
+					"name": "Pay (Buyer → Escrow)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"deal_id\": {{deal_id}},\n    \"amount\": \"1200.00\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/transactions/pay/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "transactions", "pay", ""]
+						},
+						"description": "Buyer pays for a deal. Funds move from buyer's balance to escrow_balance. Deal status changes to SHIPPED. Amount must exactly match the deal price."
+					},
+					"response": [
+						{
+							"name": "200 OK — payment successful",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"message\": \"Payment successful\",\n    \"balance\": 0.0,\n    \"escrow_balance\": 1200.0\n}"
+						},
+						{
+							"name": "400 Bad Request — insufficient funds",
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"error\": \"Insufficient funds\"\n}"
+						},
+						{
+							"name": "400 Bad Request — amount mismatch",
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"error\": \"Amount must match deal price 1200.00\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Confirm (Buyer releases escrow)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"deal_id\": {{deal_id}}\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/transactions/confirm/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "transactions", "confirm", ""]
+						},
+						"description": "Buyer confirms deal completion. If seller also confirmed, funds are released from escrow to the seller."
+					},
+					"response": [
+						{
+							"name": "200 OK — funds released",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"message\": \"Both parties confirmed. Funds released to seller.\",\n    \"deal_status\": \"RE\",\n    \"buyer_transaction\": {\n        \"id\": 5,\n        \"transaction_type\": \"RE\",\n        \"amount\": \"1200.00\",\n        \"user\": \"buyer_user\",\n        \"deal\": \"Laptop Dell XPS 15 - 1200.00\"\n    },\n    \"seller_transaction\": {\n        \"id\": 6,\n        \"transaction_type\": \"DE\",\n        \"amount\": \"1200.00\",\n        \"user\": \"testuser1\",\n        \"deal\": \"Laptop Dell XPS 15 - 1200.00\"\n    },\n    \"buyer_escrow_balance\": 0.0,\n    \"seller_balance\": 1200.0\n}"
+						},
+						{
+							"name": "200 OK — waiting for seller",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"message\": \"Receipt confirmed. Waiting for seller to confirm from their side.\",\n    \"deal_status\": \"DE\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Transaction History",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/transactions/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "transactions", ""]
+						},
+						"description": "Returns all transaction records for the authenticated user (deposits, escrow, releases, refunds)."
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "[\n    {\n        \"id\": 1,\n        \"transaction_type\": \"DE\",\n        \"amount\": \"200.00\",\n        \"user\": \"testuser1\",\n        \"user_id\": 1,\n        \"deal\": null,\n        \"deal_id\": null,\n        \"created_at\": \"2025-04-21T08:00:00Z\"\n    },\n    {\n        \"id\": 2,\n        \"transaction_type\": \"ES\",\n        \"amount\": \"1200.00\",\n        \"user\": \"testuser1\",\n        \"user_id\": 1,\n        \"deal\": \"Laptop Dell XPS 15 - 1200.00\",\n        \"deal_id\": 1,\n        \"created_at\": \"2025-04-21T10:30:00Z\"\n    }\n]"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Ratings",
+			"item": [
+				{
+					"name": "Get Ratings for User",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/ratings/?user_id=1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "ratings", ""],
+							"query": [
+								{
+									"key": "user_id",
+									"value": "1",
+									"description": "ID of the user whose ratings you want to retrieve"
+								}
+							]
+						},
+						"description": "Retrieve all ratings received by a specific user. Pass user_id as a query parameter."
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "[\n    {\n        \"id\": 1,\n        \"deal\": 1,\n        \"reviewer\": \"buyer_user\",\n        \"reviewer_id\": 2,\n        \"reviewed_user\": \"testuser1\",\n        \"reviewed_user_id\": 1,\n        \"score\": 5,\n        \"comment\": \"Great seller, fast delivery, item exactly as described!\",\n        \"created_at\": \"2025-04-21T15:00:00Z\"\n    }\n]"
+						},
+						{
+							"name": "400 Bad Request — missing user_id",
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"error\": \"user_id query parameter is required\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Submit Rating",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"deal_id\": {{deal_id}},\n    \"score\": 5,\n    \"comment\": \"Great seller, fast delivery, item exactly as described!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/ratings/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "ratings", ""]
+						},
+						"description": "Buyer submits a rating for the seller after a deal is DELIVERED or RELEASED. Score must be 1–5. Updates the seller's trust_score automatically."
+					},
+					"response": [
+						{
+							"name": "201 Created",
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"id\": 1,\n    \"deal\": 1,\n    \"reviewer\": \"buyer_user\",\n    \"reviewer_id\": 2,\n    \"reviewed_user\": \"testuser1\",\n    \"reviewed_user_id\": 1,\n    \"score\": 5,\n    \"comment\": \"Great seller, fast delivery, item exactly as described!\",\n    \"created_at\": \"2025-04-21T15:00:00Z\"\n}"
+						},
+						{
+							"name": "400 Bad Request — already rated",
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"error\": \"You have already rated this deal\"\n}"
+						},
+						{
+							"name": "400 Bad Request — not the buyer",
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"error\": \"Only the buyer can rate the seller\"\n}"
+						},
+						{
+							"name": "400 Bad Request — deal not completed",
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"error\": \"Can only rate DELIVERED deals\"\n}"
+						}
+					]
+				}
+			]
+		}
+	]
+}
