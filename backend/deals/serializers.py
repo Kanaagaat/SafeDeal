@@ -64,9 +64,6 @@ class DealSerializer(serializers.ModelSerializer):
         model = Deal
         fields = [
             'id',
-            'product_name',
-            'product_description',
-            'product_price',
             'deal_status',
             'buyer',
             'seller',
